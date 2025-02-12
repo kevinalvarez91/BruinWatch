@@ -1,9 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LoginPage from "./LoginPage";
-import HomePage from "./HomePage";
-import "./index.css"; // Ensure styles are applied
+import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage.jsx";
+import Contact from "./pages/Contact";
+import About from "./pages/About";
+import "./css/index.css"; // Ensure styles are applied
 
 console.log("main.jsx is running!"); // Debugging log
 
@@ -14,6 +16,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/home" element={<HomePage />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </Router>
   );
