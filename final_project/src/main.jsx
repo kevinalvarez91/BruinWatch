@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage.jsx";
 import Contact from "./pages/Contact";
-import About from "./pages/About";
+import About from "./pages/IncidentReport.jsx";
 import "./css/index.css"; // Ensure styles are applied
 
 console.log("main.jsx is running!"); // Debugging log
