@@ -72,7 +72,6 @@ button:focus-visible {
 
 /* Minimalistic form styling */
 input, textarea {
-  width: 100%;
   padding: 12px;
   font-size: 16px;
   border: 1px solid #ddd; /* Subtle border */
@@ -81,6 +80,13 @@ input, textarea {
   background-color: #fff;
   color: #333;
   transition: border-color 0.25s;
+}
+
+/* Remove width: 100% from inputs and textareas */
+/* Or make it more specific */
+.form-container input,
+.form-container textarea {
+  width: 100%;
 }
 
 input:focus, textarea:focus {
