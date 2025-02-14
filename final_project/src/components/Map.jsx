@@ -18,14 +18,20 @@ function MyMap() {
       zoom={15} 
       style={{ height: "100%", width: "100%" }} // Full height and width of the container
     >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer
+        url="http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+        maxZoom={20}
+        subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+        attribution='&copy; Google'
+      />
+
       <Marker 
         position={position} 
         draggable={true} 
         eventHandlers={{ dragend: handleDragEnd }}
       >
         <Popup>
-          Drag me around! <br /> Current position: {position[0].toFixed(4)}, {position[1].toFixed(4)}
+          Report a Incident <br />
         </Popup>
       </Marker>
     </MapContainer>
