@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage.jsx";
 import Contact from "./pages/Contact";
-import About from "./pages/IncidentReport.jsx";
+import Report from "./pages/IncidentReport.jsx";
 import "./css/index.css"; // Ensure styles are applied
 
 console.log("main.jsx is running!"); // Debugging log
@@ -17,7 +17,7 @@ const App = () => {
         <Route path="/" element={<LoginPage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/about" element={<About />} />
+        <Route path="/report" element={<Report />} />
       </Routes>
     </Router>
   );
