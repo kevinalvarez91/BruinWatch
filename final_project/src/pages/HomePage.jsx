@@ -1,5 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
-import MyMap from "../components/Map";
+import HomepageMap from "../components/MapHomepage";
 import Header from "./Header.jsx";
 import { useState, useEffect } from "react";
 
@@ -22,7 +22,7 @@ export default function HomePage() {
   return (
     <div>
       <div className="map-container">
-        <MyMap />
+        <HomepageMap />
       </div>
 
       <div className="preview_overlay">
