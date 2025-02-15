@@ -70,16 +70,6 @@ button:focus-visible {
   }
 }
 
-.preview_widget {
-  background-color: #e2e8f0; /* Equivalent to bg-gray-200 */
-  width: 300px; /* Fixed width */
-  height: 400px; /* Fixed height */
-  border-radius: 8px; /* Equivalent to rounded-lg */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Equivalent to shadow-md */
-  margin-top: 16px; /* Equivalent to mt-4 */
-  padding: 16px; /* Equivalent to p-4 */
-}
-
 /* Minimalistic form styling */
 input, textarea {
   padding: 12px;
@@ -163,4 +153,63 @@ input:focus, textarea:focus {
   padding: 2rem;
   box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1); /* Shadow on the right side */
   overflow-y: auto; /* Allows scrolling if content overflows */
+}
+
+/* Overlay container for the preview on HomePage */
+.preview_overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 400px; /* Fixed width */
+  height: 100vh; /* Full viewport height */
+  z-index: 2; /* Ensures it stays above other elements */
+  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+  box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1); 
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow: hidden; /* Prevents entire overlay from scrolling */
+}
+
+/* Scrollable incident list */
+.preview_list {
+  flex-grow: 1; /* Allows it to take up remaining space */
+  overflow-y: auto; /* Enables scrolling */
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Spacing between widgets */
+  padding-right: 8px; /* Avoids scrollbar overlaying content */
+}
+
+/* Individual incident widgets */
+.preview_widget {
+  background-color: #f8f9fa; /* Light gray background */
+  border-radius: 10px; /* Soft rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Depth effect */
+  padding: 16px;
+  flex-shrink: 0; 
+  width: 350px; 
+  min-height: 200px; 
+  /* display: flex;
+  align-items: center; */
+  justify-content: space-between;
+  transition: transform 0.2s ease-in-out;
+}
+
+.preview_widget:hover {
+  transform: translateY(-3px); /* Slight hover lift effect */
+}
+
+/* Custom scrollbar styling for better aesthetics */
+.preview_list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.preview_list::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.preview_list::-webkit-scrollbar-track {
+  background: transparent;
 }
