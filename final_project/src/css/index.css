@@ -133,7 +133,7 @@ input:focus, textarea:focus {
 
 /* Full-screen map container */
 .map-container {
-  position: fixed; /* Fixes the map to the viewport */
+  position: relative; /* Fixes the map to the viewport */
   top: 0;
   left: 0;
   width: 100vw; /* Full viewport width */
@@ -154,6 +154,13 @@ input:focus, textarea:focus {
   padding: 2rem;
   box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1); /* Shadow on the right side */
   overflow-y: auto; /* Allows scrolling if content overflows */
+}
+
+.app-bar {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
 }
 
 /* Overlay container for the preview on HomePage */
