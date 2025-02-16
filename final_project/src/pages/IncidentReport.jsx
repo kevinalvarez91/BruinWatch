@@ -1,6 +1,8 @@
 import { useState } from "react";
 import MyMap from "../components/Map";
 import "../css/index.css";
+import ResponsiveAppBar from "../components/Toolbar";
+
 
 const Report = () => {
   const [title, setTitle] = useState("");
@@ -12,6 +14,7 @@ const Report = () => {
 
   return (
     <div>
+      <ResponsiveAppBar />
       {/* Full-screen map */}
       <div className="map-container">
         <MyMap />
