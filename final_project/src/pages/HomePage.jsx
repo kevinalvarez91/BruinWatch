@@ -4,8 +4,12 @@ import { useState, useEffect } from "react";
 import ResponsiveAppBar from "../components/Toolbar"; // Import the ResponsiveAppBar component
 
 function Preview({ description, location, time }) {
+  const navigate=useNavigate();
   return (
-    <div className="preview_widget">
+    <div 
+    className="preview_widget cursor-pointer"
+    onClick={() => navigate("/IncidentPage")}
+    >
       <h2>{description}</h2>
       <div className="mt-4">
         <p className="text-gray-600">

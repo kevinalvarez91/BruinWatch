@@ -5,6 +5,8 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage.jsx";
 import Contact from "./pages/Contact";
 import Report from "./pages/IncidentReport.jsx";
+import IncidentPage from "./pages/IncidentPage.jsx";
+
 import "./css/index.css"; // Ensure styles are applied
 
 console.log("main.jsx is running!"); // Debugging log
@@ -18,6 +20,8 @@ const App = () => {
         <Route path="/home" element={<HomePage />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/report" element={<Report />} />
+        <Route path="/IncidentPage" element={<IncidentPage />} />
+
       </Routes>
     </Router>
   );
