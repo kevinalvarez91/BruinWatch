@@ -144,16 +144,18 @@ input:focus, textarea:focus {
 
 /* Overlay container for the form */
 .overlay {
-  position: fixed; /* Fixes the overlay to the viewport */
-  top: 0; /* Aligns to the top */
-  left: 0; /* Aligns to the left */
-  width: 400px; /* Fixed width for the overlay */
-  height: 100vh; /* Full viewport height */
-  z-index: 2; /* Ensures the overlay is above the map */
+  position: fixed;
+  bottom: 0; /* Fixed to the bottom of the screen */
+  top: 40px; /* Move the top down by 60px */
+  left: 0;
+  width: 400px; /* Fixed width */
+  z-index: 2; /* Ensures it stays above other elements */
   background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
-  padding: 2rem;
-  box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1); /* Shadow on the right side */
-  overflow-y: auto; /* Allows scrolling if content overflows */
+  box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow: hidden; /* Prevents entire overlay from scrolling */
 }
 
 .app-bar {
@@ -166,13 +168,13 @@ input:focus, textarea:focus {
 /* Overlay container for the preview on HomePage */
 .preview_overlay {
   position: fixed;
-  top: 0;
+  bottom: 0; /* Fixed to the bottom of the screen */
+  top: 40px; /* Move the top down by 60px */
   left: 0;
   width: 400px; /* Fixed width */
-  height: 100vh; /* Full viewport height */
   z-index: 2; /* Ensures it stays above other elements */
   background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
-  box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1); 
+  box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -187,6 +189,7 @@ input:focus, textarea:focus {
   flex-direction: column;
   gap: 12px; /* Spacing between widgets */
   padding-right: 8px; /* Avoids scrollbar overlaying content */
+
 }
 
 /* Individual incident widgets */
