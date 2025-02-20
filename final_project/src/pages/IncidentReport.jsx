@@ -30,6 +30,7 @@ const Report = () => {
           {/* Title Input */}
           <div className="flex-col">
             <label className="text-gray-700 font-semibold">Incident Title</label>
+            <label className="text-gray-700 font-semibold">Mark a location via a pin</label>
             <input
               type="text"
               value={title}

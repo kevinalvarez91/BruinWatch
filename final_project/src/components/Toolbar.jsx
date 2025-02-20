@@ -18,7 +18,7 @@ import bear_with_glasses from '../assets/bear_with_glasses.jpg';
 const pages = [
   { name: 'Report', path: '/report' },
   { name: 'Contact', path: '/contact' },
-  { name: 'Login', path: '/' }
+  { name: 'Logout', path: '/' }
 ];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 

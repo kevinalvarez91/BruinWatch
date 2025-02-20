@@ -1,5 +1,7 @@
 import { useState } from "react";
 import scooterIncident from "../assets/scooterIncident.jpg";
+import ResponsiveAppBar from "../components/Toolbar";
+
 
 const IncidentPage = () => {
   const [isResolved, setIsResolved] = useState(false);
@@ -9,8 +11,10 @@ const IncidentPage = () => {
   return (
     
     <div className="flex justify-center w-full">
+    <ResponsiveAppBar />
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <h2 style={{ textAlign: "center" }}>Scooter Accident</h2>
+      <h2 style={{ textAlign: "center" }}>Null</h2> {/*This is just to move down scotter accident, without introducing CSS */}
+      <h2 style={{textAlign: "center"}}>Scooter Accident</h2>
       <h3 style={{ textAlign: "center" }}>Location: Bruinwalk</h3>
     
           <h4 className="text-lg font-medium" style={{ textAlign: "center" }}>
@@ -21,7 +25,7 @@ const IncidentPage = () => {
             person on scooter fled the scene.
           </h4>
     </div>
-    <div className="flex justify-center w-full">
+    <div className="flex justify-center items-center w-full my-4" >
      <img 
        src={scooterIncident} 
        alt="Scooter Incident" 
