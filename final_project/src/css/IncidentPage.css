@@ -1,4 +1,14 @@
 /* container for the title */
+
+.comment-container{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    width:100%;
+}
+.incident-page{
+    overflow: auto;
+}
 .title-container {
     flex-direction: column; /* Stacks items vertically */
     display: flex;
@@ -8,7 +18,7 @@
     min-width: 300px; /* Ensures it doesn't get too narrow */
     margin: 0 auto; /* Ensures centering */
     height: auto; /* Keeps a fixed height */
-    margin-top: 55px;
+    margin-top: 65px;
     
   }
 h1 {
@@ -31,4 +41,83 @@ h1 {
     margin: 0 auto; /* Ensures centering */
     line-height: 1.5; /* Improves readability */
 }
+.comment-section{
+    width:80%;
+    max-width: 600px;
+    margin: 50px auto;
+    text-align:center;
+    background: #cecfd1;
+    padding:10px;
+    border-radius: 10px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+.comment-input{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    margin-top:10px;
+    width:100%;
+    position: relative;
+}
+.comment-input input{
+    width:100%;
+    min-height:40px;
+    max-width:100%;
+
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline:none;
+    resize:none;
+    overflow:hidden;
+    white-space:pre-wrap;
+}
+.comment-input input:focus,
+.comment-input input:not(:placeholder-shown){
+    height:auto;
+    min-height:40px;
+    max-height:150px;
+    overflow:hidden;
+}
+.comment-input button {
+    width:auto;
+    padding: 10px 15px;
+    font-size: 14px;
+    background-color: blue;
+    color: rgb(255, 255, 255);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: flex-end;
+  }
+  
+.comment-input button:hover {
+    background-color: darkblue;
+  }
+/* for the comments */
+.all-comments {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+    display:flex;
+    flex-direction: column-reverse;
+    width:100%;
+  }
+  
+  .comment {
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    width:100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    overflow: break-word;
+    min-height:40px;
+    max-width:100%;
+  }
 

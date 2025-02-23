@@ -27,7 +27,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: #f9f9f9; /* Consistent light background */
-  overflow: hidden; /* Prevents scrolling */
+  overflow: auto; /* Prevents scrolling */
 }
 
 h1 {
@@ -108,6 +108,8 @@ input:focus, textarea:focus {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
+  
+
 /* Spacing and alignment */
 .flex-col {
   display: flex;
@@ -155,7 +157,7 @@ input:focus, textarea:focus {
   display: flex;
   flex-direction: column;
   padding: 20px;
-  overflow: hidden; /* Prevents entire overlay from scrolling */
+  overflow: auto; /* Prevents entire overlay from scrolling */
 }
 
 .app-bar {
