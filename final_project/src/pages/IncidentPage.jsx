@@ -1,56 +1,47 @@
 import { useState } from "react";
 import scooterIncident from "../assets/scooterIncident.jpg";
 import ResponsiveAppBar from "../components/Toolbar";
+import "../css/IncidentPage.css";
 
 
 const IncidentPage = () => {
-  const [isResolved, setIsResolved] = useState(false);
+  //for 
+  const [isResolved, setIsResolved] = useState(0);
+  const [isUnresolved, setIsUnresolved] = useState(0);
   const handleResolvedClick = () => {
     setIsResolved(true);
   }
+  const handleUnresolvedClick = () => {
+    setIsUnresolved(true);
+  }
   return (
-    
-    <div className="flex justify-center w-full">
+    //including the responsiveAppBar
+
+    //this is for the title 
+    <div>
     <ResponsiveAppBar />
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h2 style={{ textAlign: "center" }}>Null</h2> {/*This is just to move down scotter accident, without introducing CSS */}
-      <h2 style={{textAlign: "center"}}>Scooter Accident</h2>
-      <h3 style={{ textAlign: "center" }}>Location: Bruinwalk</h3>
-    
-          <h4 className="text-lg font-medium" style={{ textAlign: "center" }}>
-            Description: I was just walking and saw someone get
-            run over by someone speeding in a scooter, ucla needs 
-            enforce no scooter policies more harshley!  The person
-            who got hit is said to have broken their arm, while the
-            person on scooter fled the scene.
-          </h4>
+    <div className= "title-container">
+      <h1>Scooter Accident</h1>
+      <h3 className="location">Location: Bruinwalk</h3>
+      {/*this is for the description */}
+      <p className="description">
+        Description: I was just walking and saw someone get
+        run over by someone speeding in a scooter, ucla needs 
+        enforce no scooter policies more harshly!  The person
+        who got hit is said to have broken their arm, while the
+        person on scooter fled the scene.  Also, to the people that
+        kept trying to help. Thank you!
+      </p>
+      {/*now for the image */}
+      <img 
+        src={scooterIncident} 
+        alt="Scooter Incident" 
+        width="500" 
+        className="mx-auto my-4 block"
+        />
     </div>
-    <div className="flex justify-center items-center w-full my-4" >
-     <img 
-       src={scooterIncident} 
-       alt="Scooter Incident" 
-       width="500" 
-       className="mx-auto my-4 block"
-      />
     </div>
-   
- <div>
-       
-       <button
-        onClick={handleResolvedClick}
-        className={`p-2 text-white rounded transition ${
-          isResolved ? "bg-green-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"
-        }`}
-      >
-        {isResolved ? "Resolved ✅" : "Resolved"}
-      </button>
-      <button>Active</button>
-      
-      <h4>Comments</h4>
-  </div>
-  </div>
   
-   
   );
 };
 
