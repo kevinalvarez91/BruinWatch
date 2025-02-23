@@ -1,0 +1,34 @@
+/* container for the title */
+.title-container {
+    flex-direction: column; /* Stacks items vertically */
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    width: 33%; /* Limits width to the middle third of the screen */
+    min-width: 300px; /* Ensures it doesn't get too narrow */
+    margin: 0 auto; /* Ensures centering */
+    height: auto; /* Keeps a fixed height */
+    margin-top: 55px;
+    
+  }
+h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+.location {
+    margin:0;
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 10px; /* Adds space below the location */
+    flex-direction: column; /* Stacks items vertically */
+  
+}
+
+.description {
+    font-size: 16px;
+    text-align: center;
+    max-width: 80%; /* Prevents text from being too wide */
+    margin: 0 auto; /* Ensures centering */
+    line-height: 1.5; /* Improves readability */
+}
+
