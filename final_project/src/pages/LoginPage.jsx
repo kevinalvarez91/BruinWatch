@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import logo from '../assets/bear_with_glasses.jpg';
+import '../css/LoginPage.css'
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -18,7 +20,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+    <div className="login-container">
       <motion.h1 
         className="text-4xl font-bold mb-8 text-gray-800"
         initial={{ opacity: 0, y: -20 }}
@@ -28,21 +30,21 @@ export default function LoginPage() {
         BruinWatch
       </motion.h1>
       
-      <motion.div>
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Login</h2>
+      <img src={logo} alt="Logo" className="logo" />
+
+      <motion.div className="form-container">
         <motion.div
-          className="p-8 w-96 shadow-lg rounded-lg bg-white text-center form-container"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full max-w-[280px] p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-field"
             required
           />
           <input
@@ -50,12 +52,12 @@ export default function LoginPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full max-w-[280px] p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-field"
             required
-          />
+          />                     
           <button 
             type="submit" 
-            className="w-full max-w-[280px] p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+            className="submit-button"
           >
             Login
           </button>
