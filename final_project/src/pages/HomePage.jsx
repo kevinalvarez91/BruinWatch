@@ -1,7 +1,8 @@
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import HomepageMap from "../components/MapHomepage";
 import { useState, useEffect } from "react";
 import ResponsiveAppBar from "../components/Toolbar"; // Import the ResponsiveAppBar component
+
 
 function Preview({ description, location, time }) {
   const navigate=useNavigate();
@@ -29,6 +30,26 @@ function Preview({ description, location, time }) {
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [previews, setPreviews] = useState([
+    { description: "Scooter accident", location: "bruinwalk", time: "23:50 2/12/2025" },
+    { description: "Fire alarm", location: "de neve plaza", time: "12:00" },
+    { description: "Man with gun", location: "bruin plaza", time: "12:00" },
+    { description: "Man with gun", location: "bruin plaza", time: "12:00" },
+  ]);
+  const location = useLocation();
+
+  useEffect(() => {
+    // Fetch or generate your preview data here.  This is a placeholder.
+    const newPreviewFromReport = location.state?.newPreview;
+
+    // 2. Add newPreview to previews array (if it exists)
+    if (newPreviewFromReport) {
+      setPreviews([newPreviewFromReport, ...previews]); 
+    } 
+  }, [location.state]); 
+
+
+
   return (
     <div>
       <ResponsiveAppBar /> {/* Include the ResponsiveAppBar component here */}
@@ -38,35 +59,12 @@ export default function HomePage() {
 
       <div className="preview_overlay">
         <h1>Latest Near You</h1>
-        <div className="preview_list">
-          <Preview
-            description="Scooter accident"
-            location="bruinwalk"
-            time="23:50 2/12/2025"
-          />
-          <Preview
-            description="Fire alarm"
-            location="de neve plaza"
-            time="12:00"
-          />
-          <Preview
-            description="Man with gun"
-            location="bruin plaza"
-            time="12:00"
-          />
-          <Preview
-            description="Man with gun"
-            location="bruin plaza"
-            time="12:00"
-          />
-        </div>
-        <p className="text-gray-600">Click the button below to logout</p>
-        <button
-          onClick={() => navigate("/")}
-          className="p-2 bg-red-500 text-white rounded"
-        >
-          Logout
-        </button>
+          <div className="preview_list">
+            {previews.map((preview, index) => ( // Map over the previews array
+              <Preview key={index} {...preview} /> // Spread props for cleaner code
+            ))}
+          </div>
+
       </div>
     </div>
   );

@@ -2,14 +2,21 @@ import { useState } from "react";
 import MyMap from "../components/Map";
 import "../css/index.css";
 import ResponsiveAppBar from "../components/Toolbar";
-
+import { useNavigate } from "react-router-dom";
 
 const Report = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleSubmit = () => {
     alert(`Incident Reported!\nTitle: ${title}\nDescription: ${description}`);
+    const newPreview = {
+      description: title,
+      location: "User Selected Location (replace with actual location)", // Get location from map
+      time: new Date().toLocaleString(), // Current time
+    };
+    navigate("/home", { state: { newPreview } });
   };
 
   return (
