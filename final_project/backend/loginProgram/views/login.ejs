@@ -1,0 +1,18 @@
+<h1>Login</h1>
+<!-- in order to display the error message we need this -->
+  <!-- flash    passport -->
+<% if (messages.error) { %>
+    <%= messages.error %>
+<% } %>
+<form action="/login" method="POST"> <!-- we are going to post to a route with the name /register inside of our server -->
+    <div>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit">Login</button>
+</form>
+<a href="/register">Register</a>
