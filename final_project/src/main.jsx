@@ -7,6 +7,8 @@ import Contact from "./pages/Contact";
 import Report from "./pages/IncidentReport.jsx";
 import IncidentPage from "./pages/IncidentPage.jsx";
 
+//This is a test for pushing
+
 import "./css/index.css"; // Ensure styles are applied
 
 console.log("main.jsx is running!"); // Debugging log
