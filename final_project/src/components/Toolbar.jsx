@@ -154,21 +154,28 @@ function ResponsiveAppBar() {
               anchorOrigin={{
                 vertical: 'top',
                 horizontal: 'right',
-              }}
+                    }}
               keepMounted
               transformOrigin={{
                 vertical: 'top',
                 horizontal: 'right',
-              }}
+                    }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
-            >
+                  >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
+            setting === 'Logout' ? (
+          <MenuItem key={setting} onClick={handleCloseUserMenu} component={Link} to="/">
+          <Typography textAlign="center">{setting}</Typography>
+          </MenuItem>
+            ) : (
+          <MenuItem key={setting} onClick={handleCloseUserMenu}>
+          <Typography textAlign="center">{setting}</Typography>
+        </MenuItem>
+          )
+          ))}
+        </Menu>
+
           </Box>
         </Toolbar>
       </Container>
