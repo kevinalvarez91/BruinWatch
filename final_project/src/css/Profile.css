@@ -1,0 +1,71 @@
+.profile-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .profile-header {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 20px;
+  }
+  
+  .profile-basic h1 {
+    margin: 0;
+    font-size: 1.8em;
+  }
+  
+  .profile-basic p {
+    margin: 4px 0;
+    color: #666;
+  }
+  
+  .profile-about,
+  .profile-contact,
+  .profile-interests,
+  .profile-trust-rating {
+    margin-bottom: 20px;
+  }
+  
+  .profile-about h2,
+  .profile-contact h2,
+  .profile-interests h2,
+  .profile-trust-rating h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+  }
+  
+  .profile-interests ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .profile-interests li {
+    background-color: #e2e2e2;
+    display: inline-block;
+    margin: 5px 5px 0 0;
+    padding: 5px 10px;
+    border-radius: 20px;
+  }
+  
+  .profile-trust-rating .rating {
+    font-size: 1.2em;
+    color: #ff9900;
+  }
+  

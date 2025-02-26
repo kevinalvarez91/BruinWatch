@@ -12,7 +12,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { Link } from 'react-router-dom';
 import bear_with_glasses from '../assets/bear_with_glasses.jpg';
 
 const pages = [
@@ -49,15 +49,15 @@ function ResponsiveAppBar() {
           {/* Logo and Home link for larger screens */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mr: 2 }}>
             <img 
-            src={bear_with_glasses}
-            alt="Bear with Glasses"
-            style={{width: '40px', height:'40px', marginRight:'9px'}}
+              src={bear_with_glasses}
+              alt="Bear with Glasses"
+              style={{ width: '40px', height:'40px', marginRight:'9px' }}
             />
             <Typography
               variant="h6"
               noWrap
-              component={Link} // Use Link component for navigation
-              to="/home" // Link to the home page
+              component={Link}
+              to="/home"
               sx={{
                 fontFamily: 'monospace',
                 fontWeight: 700,
@@ -99,7 +99,12 @@ function ResponsiveAppBar() {
               sx={{ display: { xs: 'block', md: 'none' } }}
             >
               {pages.map((page) => (
-                <MenuItem key={page.name} onClick={handleCloseNavMenu} component={Link} to={page.path}>
+                <MenuItem 
+                  key={page.name} 
+                  onClick={handleCloseNavMenu} 
+                  component={Link} 
+                  to={page.path}
+                >
                   <Typography textAlign="center">{page.name}</Typography>
                 </MenuItem>
               ))}
@@ -112,8 +117,8 @@ function ResponsiveAppBar() {
             <Typography
               variant="h5"
               noWrap
-              component={Link} // Use Link component for navigation
-              to="/home" // Link to the home page
+              component={Link}
+              to="/home"
               sx={{
                 fontFamily: 'monospace',
                 fontWeight: 700,
@@ -131,8 +136,8 @@ function ResponsiveAppBar() {
             {pages.map((page) => (
               <Button
                 key={page.name}
-                component={Link} // Use Link component for navigation
-                to={page.path} // Link to the respective page
+                component={Link}
+                to={page.path}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 {page.name}
@@ -144,7 +149,7 @@ function ResponsiveAppBar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
               </IconButton>
             </Tooltip>
             <Menu
@@ -154,28 +159,73 @@ function ResponsiveAppBar() {
               anchorOrigin={{
                 vertical: 'top',
                 horizontal: 'right',
-                    }}
+              }}
               keepMounted
               transformOrigin={{
                 vertical: 'top',
                 horizontal: 'right',
-                    }}
+              }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
-                  >
-              {settings.map((setting) => (
-            setting === 'Logout' ? (
-          <MenuItem key={setting} onClick={handleCloseUserMenu} component={Link} to="/">
-          <Typography textAlign="center">{setting}</Typography>
-          </MenuItem>
-            ) : (
-          <MenuItem key={setting} onClick={handleCloseUserMenu}>
-          <Typography textAlign="center">{setting}</Typography>
-        </MenuItem>
-          )
-          ))}
-        </Menu>
-
+            >
+              {settings.map((setting) => {
+                if (setting === 'Profile') {
+                  return (
+                    <MenuItem 
+                      key={setting} 
+                      onClick={handleCloseUserMenu} 
+                      component={Link} 
+                      to="/Profile"
+                    >
+                      <Typography textAlign="center">{setting}</Typography>
+                    </MenuItem>
+                  );
+                } else if (setting === 'Dashboard') {
+                  return (
+                    <MenuItem 
+                      key={setting} 
+                      onClick={handleCloseUserMenu} 
+                      component={Link} 
+                      to="/Dashboard"
+                    >
+                      <Typography textAlign="center">{setting}</Typography>
+                    </MenuItem>
+                  );
+                } else if (setting === 'Logout') {
+                  return (
+                    <MenuItem 
+                      key={setting} 
+                      onClick={handleCloseUserMenu} 
+                      component={Link} 
+                      to="/"
+                    >
+                      <Typography textAlign="center">{setting}</Typography>
+                    </MenuItem>
+                  );
+                }else if (setting === 'Account') {
+                  return (
+                    <MenuItem 
+                      key={setting} 
+                      onClick={handleCloseUserMenu} 
+                      component={Link} 
+                      to="/Account"
+                    >
+                      <Typography textAlign="center">{setting}</Typography>
+                    </MenuItem>
+                  );
+                } 
+                else {
+                  return (
+                    <MenuItem 
+                      key={setting} 
+                      onClick={handleCloseUserMenu}
+                    >
+                      <Typography textAlign="center">{setting}</Typography>
+                    </MenuItem>
+                  );
+                }
+              })}
+            </Menu>
           </Box>
         </Toolbar>
       </Container>
