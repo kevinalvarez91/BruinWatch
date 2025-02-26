@@ -6,8 +6,10 @@ import HomePage from "./pages/HomePage.jsx";
 import Contact from "./pages/Contact";
 import Report from "./pages/IncidentReport.jsx";
 import IncidentPage from "./pages/IncidentPage.jsx";
+import Profile from "./pages/Profile.jsx";
+import DashBoard from "./pages/DashBoard.jsx";
+import Account from "./pages/Account.jsx";
 
-//This is a test for pushing
 
 import "./css/index.css"; // Ensure styles are applied
 
@@ -23,7 +25,9 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/report" element={<Report />} />
         <Route path="/IncidentPage" element={<IncidentPage />} />
-
+        <Route path="/Profile" element={<Profile />} />
+        <Route path="/Dashboard" element={<DashBoard/>} />
+        <Route path="/Account" element={<Account />} />
       </Routes>
     </Router>
   );
