@@ -17,7 +17,7 @@ const Contact = () => {
           <h2>Our Information</h2>
           <p><strong>Email:</strong> bruinwatch@ucla.edu</p>
           <p><strong>Phone:</strong> +1 (310) 825-4321</p>
-          <p><strong>Address:</strong> 405 Hilgard Avenue, WestWood, California, 90024</p>
+          <p><strong>Address:</strong> 405 Hilgard Avenue, Westwood, California, 90024</p>
           <p><strong>Business Hours:</strong> Mon-Fri: 9am - 5pm</p>
         </div>
         <div className="form-container">
