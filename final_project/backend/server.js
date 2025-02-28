@@ -118,13 +118,13 @@ app.get("/home", checkAuthenticated, (req, res) => {
     res.json({ user: req.user });
   });
 
-  app.get("/auth-status", (req, res) => {
-    if (req.isAuthenticated()) {
-      res.json({ authenticated: true, user: req.user });
-    } else {
-      res.status(401).json({ authenticated: false }); // ✅ Ensure proper 401 Unauthorized response
-    }
-  });
+  // app.get("/auth-status", (req, res) => {
+  //   if (req.isAuthenticated()) {
+  //     res.json({ authenticated: true, user: req.user });
+  //   } else {
+  //     res.status(401).json({ authenticated: false }); // ✅ Ensure proper 401 Unauthorized response
+  //   }
+  // });
   
 // we don't want to allow non-logged-in users to access any information
 // this will protect all of our different routes for when we aren't logged in
