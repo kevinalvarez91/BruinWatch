@@ -49,7 +49,7 @@ const IncidentPage = () => {
         className="mx-auto my-4 block"
         />
       {/*this is for the comment section*/}
-      <div>
+      <div className="button-container">
         <button className="active-button">
           Active
         </button>
