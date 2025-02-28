@@ -2,8 +2,6 @@
 const LocalStrategy = require('passport-local').Strategy
 const bcrypt = require('bcrypt')
 
-// const { authenticate } = require('passport')
-
 // set up passport to be working with our login 
 // passport related information
 // now we can do all of our configuration for passport inside of this single file
@@ -12,11 +10,7 @@ function initialize (passport, getUserByEmail, getUserByID) {
     const authenticateUser = async (email, password, done) => {
         // this will return us the user by email or return null if there is no email for this user
         const user = getUserByEmail(email)
-        if(user == null) {
-            // function we call everytime we are done
-                /*     (error, user we found)          */
-            return done(null, false, { message: "No user with that email" })
-        }
+        if (!user) return done(null, false, { message: "Email not found" });
         
         // if the user gets to this point that means that there is a user and now we want to authenticate their password using bcrypt
         try {
@@ -25,7 +19,7 @@ function initialize (passport, getUserByEmail, getUserByID) {
                 return done(null, user)
             }
             else {
-                return done(null, false, { message: "Password incorrect" })
+                return done(null, false, { message: "Incorrect Password" })
             }
             // catching the error
         } catch(e) {

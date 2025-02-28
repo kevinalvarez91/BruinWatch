@@ -2,7 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
-import HomePage from "./pages/HomePage.jsx";
+import HomePage from "./pages/HomePage";
+import RegisterPage from "./pages/RegisterPage";
 import Contact from "./pages/Contact";
 import Report from "./pages/IncidentReport.jsx";
 import IncidentPage from "./pages/IncidentPage.jsx";
@@ -21,7 +22,10 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/home" element={<HomePage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<LoginPage />} /> { /* redirect unknown routes to login page */ }
         <Route path="/contact" element={<Contact />} />
         <Route path="/report" element={<Report />} />
         <Route path="/IncidentPage" element={<IncidentPage />} />
