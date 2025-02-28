@@ -18,7 +18,7 @@
     min-width: 300px; /* Ensures it doesn't get too narrow */
     margin: 0 auto; /* Ensures centering */
     height: auto; /* Keeps a fixed height */
-    margin-top: 65px;
+    margin-top: 150px;
     
   }
 h1 {
@@ -121,3 +121,32 @@ h1 {
     max-width:100%;
   }
 
+.active-button{
+    color:white;
+    background-color:red ;
+    margin-top: 30px;
+    margin-right:10px;
+    margin-left:10px;
+    padding: 10px 15px;
+    font-size: 14px;
+    
+}
+.active-button:hover{
+    background-color: rgb(167, 0, 0);
+    color:white;
+}
+
+.resolved-button{
+    color:white;
+    background-color:rgb(55, 162, 249);
+    margin-top: 30px;
+    margin-right:10px;
+    margin-left:10px;
+    padding: 10px 15px;
+    font-size: 14px;
+    
+}
+.resolved-button:hover{
+    background-color: rgb(54, 114, 203);
+    color:white;
+}

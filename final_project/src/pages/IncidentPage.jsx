@@ -49,6 +49,15 @@ const IncidentPage = () => {
         className="mx-auto my-4 block"
         />
       {/*this is for the comment section*/}
+      <div>
+        <button className="active-button">
+          Active
+        </button>
+        <button className="resolved-button">
+          Resolved
+        </button>
+      </div>
+      
       <div className="comment-section">
         <p>
           Roar Board
@@ -95,6 +104,8 @@ const IncidentPage = () => {
             ))}
           </ul>
         </div>
+        {/*this is for the active and unresolved buttons */}
+      
       </div>
     </div>
     
