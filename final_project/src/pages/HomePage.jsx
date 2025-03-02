@@ -33,6 +33,14 @@ export default function HomePage() {
   ]);
   const location = useLocation();
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter previews based on search term
+  const filteredPreviews = previews.filter(preview =>
+    preview.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    preview.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   useEffect(() => {
     // Check if the user is authenticated
     // fetch("http://localhost:5001/auth-status", {
