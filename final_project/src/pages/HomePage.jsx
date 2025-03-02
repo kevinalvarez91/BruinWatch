@@ -23,7 +23,8 @@ function Preview({ description, location, time }) {
 }
 
 export default function HomePage() {
-  const [searchTerm, setSearchTerm] = useState(""); // Track search input
+  // const [isAuthenticated, setIsAuthenticated] = useState(null);  // Store auth status
+  const navigate = useNavigate();
   const [previews, setPreviews] = useState([
     { description: "Scooter accident", location: "Bruinwalk", time: "23:50 2/12/2025" },
     { description: "Fire alarm", location: "De Neve Plaza", time: "12:00" },
@@ -33,17 +34,37 @@ export default function HomePage() {
   const location = useLocation();
 
   useEffect(() => {
+    // Check if the user is authenticated
+    // fetch("http://localhost:5001/auth-status", {
+    //   credentials: "include",
+    // })
+    //   .then(res => {
+    //     if (!res.ok) throw new Error("Unauthorized"); // Handle 401 Unauthorized properly
+    //     return res.json();
+    //   })
+    //   .then(data => {
+    //     if (data.authenticated) {
+    //       setIsAuthenticated(true);  // Allow access
+    //     } else {
+    //       throw new Error("Unauthorized");
+    //     }
+    //   })
+    //   .catch(() => {
+    //     setIsAuthenticated(false);
+    //     navigate("/login");  // Redirect if not authenticated
+    //   });
+
+    // Fetch or generate your preview data here.  This is a placeholder.
     const newPreviewFromReport = location.state?.newPreview;
     if (newPreviewFromReport) {
       setPreviews((prev) => [newPreviewFromReport, ...prev]); 
     }
   }, [location.state]);
 
-  // **Filter incidents based on search term**
-  const filteredPreviews = previews.filter((preview) =>
-    preview.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    preview.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Prevent rendering if authentication check is in progress
+  // if (isAuthenticated === null) {
+  //   return <p>Loading...</p>;
+  // }
 
   return (
     <div>

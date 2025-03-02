@@ -12,7 +12,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import bear_with_glasses from '../assets/bear_with_glasses.jpg';
 
 const pages = [
@@ -25,6 +25,7 @@ const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const navigate = useNavigate(); // for redirection
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -40,6 +41,19 @@ function ResponsiveAppBar() {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+  };
+
+  // logout button function
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:5001/logout", {  // ✅ Use correct backend port
+        method: "POST",
+        credentials: "include",  // ✅ Ensures session is properly cleared
+      });
+      navigate("/login");  // ✅ Redirect to login after logging out
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -195,7 +209,7 @@ function ResponsiveAppBar() {
                   return (
                     <MenuItem 
                       key={setting} 
-                      onClick={handleCloseUserMenu} 
+                      onClick={handleLogout}
                       component={Link} 
                       to="/"
                     >

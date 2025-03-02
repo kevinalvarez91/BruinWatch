@@ -1,21 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import logo from '../assets/bear_with_glasses.jpg';
 import '../css/LoginPage.css'
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+    // Check if the user is already logged in
+    useEffect(() => {
+      fetch("http://localhost:5001/login", { credentials: "include" })
+        .then(res => res.json())
+        .then(data => {
+          if (data.user) {
+            navigate("/home");  // Redirect if already logged in
+          }
+        })
+        .catch(err => console.error("Error checking auth status:", err));
+    }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username === "1" && password === "1") {
-      navigate("/home");
-    } else {
-      setMessage("Invalid credentials. Try again.");
+    setMessage("");
+
+    try {
+      const response = await fetch("http://localhost:5001/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),  // Send email instead of username
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if(response.ok) {
+        navigate("/home"); // redirect to home after login
+      } else {
+        setMessage(data.message || "Invalid credentials. Try again.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setMessage("Error logging in. Please try again later.");
     }
   };
 
@@ -40,10 +68,10 @@ export default function LoginPage() {
         >
         <form onSubmit={handleSubmit}>
           <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="input-field"
             required
           />
@@ -62,6 +90,15 @@ export default function LoginPage() {
             Login
           </button>
         </form>
+
+        {/* Add Register Button Below */}
+        <button 
+          onClick={() => navigate("/register")} 
+          className="register-button"
+        >
+          Don't have an account? Register here
+        </button>
+
         </motion.div>
         {message && <p className="mt-4 text-red-500">{message}</p>}
       </motion.div>
