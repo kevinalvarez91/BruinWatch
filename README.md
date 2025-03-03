@@ -36,6 +36,13 @@ npm install
 
 # Start the development server
 npm run dev
+
+# Start the backend
+cd backend
+node server.js
+
+#Note you must create a .env file
+touch .env
 ```
 
 ## Contributing
