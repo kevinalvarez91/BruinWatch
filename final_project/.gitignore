@@ -15,6 +15,9 @@ dist-ssr
 # sensitive info
 .env
 
+#database for now
+.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
