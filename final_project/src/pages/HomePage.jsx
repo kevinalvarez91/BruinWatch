@@ -2,6 +2,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import HomepageMap from "../components/MapHomepage";
 import { useState, useEffect } from "react";
 import ResponsiveAppBar from "../components/Toolbar";
+import Search from "../components/Search"; // Import Search component
 
 function Preview({ title, description, lat, lng, image_path, created_at }) {
   const navigate = useNavigate();
@@ -32,6 +33,13 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [previews, setPreviews] = useState([]);
   const location = useLocation();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter previews based on search term
+  const filteredPreviews = previews.filter(preview =>
+    (preview.description && preview.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (preview.title && preview.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   useEffect(() => {
     // Fetch incident reports from the server
@@ -55,10 +63,13 @@ export default function HomePage() {
       <div className="map-container">
         <HomepageMap />
       </div>
-      <div className="preview_overlay">
+      <div className="preview_overlay flex flex-col space-y-8">
         <h1>Latest Near You</h1>
+        
+        <Search onSearch={setSearchTerm} />
+        
         <div className="preview_list">
-          {previews.map((preview, index) => (
+          {filteredPreviews.map((preview, index) => (
             <Preview key={index} {...preview} />
           ))}
         </div>
