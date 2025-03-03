@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
+/*This is a test commit*/ 
 // This is the map that we are going to use for the homepage (no ability to report incident, just view incidents)
 function HomepageMap({ incidents }) {
   return (
