@@ -7,16 +7,82 @@ import { useNavigate } from "react-router-dom";
 const Report = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [coordinates, setCoordinates] = useState(null);
+  const navigate = useNavigate();
 
-  const handleSubmit = () => {
-    alert(`Incident Reported!\nTitle: ${title}\nDescription: ${description}`);
-    const newPreview = {
-      description: title,
-      location: "User Selected Location (replace with actual location)", // Get location from map
-      time: new Date().toLocaleString(), // Current time
-    };
-    navigate("/home", { state: { newPreview } });
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+    } else {
+      setImage(null);
+      setPreview(null);
+    }
+  };
+
+  const handleSubmit = async () => {    
+    console.log("Coordinates before sending:", coordinates);
+    
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+      
+    // Make sure coordinates exist and are properly formatted before sending
+    if (coordinates) {
+      // Convert to string to ensure proper transmission
+      const latVal = Array.isArray(coordinates) ? coordinates[0] : coordinates.lat;
+      const lngVal = Array.isArray(coordinates) ? coordinates[1] : coordinates.lng;
+        
+      // Debug - check values
+      console.log("Sending lat:", latVal, "lng:", lngVal);
+        
+      // Only append if they're actually numbers
+      if (!isNaN(latVal) && !isNaN(lngVal)) {
+        formData.append("lat", latVal.toString());
+        formData.append("lng", lngVal.toString());
+      } else {
+        alert("Please select a valid location on the map");
+        return;
+      }
+    } else {
+      alert("Please mark a location on the map");
+      return;
+    }
+    
+    if (image) {
+      formData.append("image", image);
+    }
+    
+    try {
+      const res = await fetch("http://localhost:5001/report", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert("Incident Reported successfully!");
+        
+        // Include actual coordinates in the preview
+        const newPreview = {
+          title: title,
+          description: description,
+          lat: Array.isArray(coordinates) ? coordinates[0] : coordinates.lat,
+          lng: Array.isArray(coordinates) ? coordinates[1] : coordinates.lng,
+          created_at: new Date().toISOString()
+        };
+        
+        navigate("/home", { state: { newPreview } });
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to report incident: ${errorData.message || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error reporting incident.");
+    }
   };
 
   return (
@@ -24,7 +90,7 @@ const Report = () => {
       <ResponsiveAppBar />
       {/* Full-screen map */}
       <div className="map-container">
-        <MyMap />
+        <MyMap onLocationSelect={setCoordinates} />
       </div>
 
       {/* Overlay for the form (on the left side) */}
@@ -56,6 +122,19 @@ const Report = () => {
               rows="4"
               className="textarea-custom"
             />
+          </div>
+
+          {/* Image Input */}
+          <div className="flex-col">
+            <label className="text-gray-700 font-semibold">Upload Image</label>
+            <input type="file" accept="image/*" onChange={handleImageChange} />
+            {preview && (
+              <img
+                src={preview}
+                alt="Image Preview"
+                style={{ marginTop: "10px", maxWidth: "100%", height: "auto" }}
+              />
+            )}
           </div>
 
           {/* Report Button */}
