@@ -24,6 +24,10 @@ const Account = () => {
           <label htmlFor="contact">Contact Number:</label>
           <input type="tel" id="contact" placeholder="(123) 456-7890" />
         </div>
+        <div className="info-group">
+          <label htmlFor="aboutMe">About me:</label>
+          <input type="aboutMe" id="aboutMe" placeholder="I am a software engineer." />
+          </div>
       </section>
 
       {/* Login & Security Settings Section */}
@@ -39,17 +43,6 @@ const Account = () => {
             <button className="enable-2fa">Enable 2FA</button>
             <button className="disable-2fa">Disable 2FA</button>
           </div>
-        </div>
-      </section>
-
-      {/* Graphs / Placeholder Section */}
-      <section className="graphs">
-        <h2>Account Activity</h2>
-        <div className="graph-placeholder">
-          <p>Graph Placeholder 1</p>
-        </div>
-        <div className="graph-placeholder">
-          <p>Graph Placeholder 2</p>
         </div>
       </section>
     </div>
