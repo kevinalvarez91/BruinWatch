@@ -1,150 +1,196 @@
-// npm install to install everything
+const fs = require('fs');
+const uploadDir = 'uploads';
 
-// loading in environment variables and set them into our process.env
-if(process.env.NODE_ENV !== 'production') {
-    require('dotenv').config()
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Requires for each library that we installed
-// ============================================================================================================================================
-// set up our basic express application
-const express = require('express')
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
-// we also need to be able to hash our users password
-const bcrypt = require('bcrypt')
+const express = require('express');
+const bcrypt = require('bcrypt');
+const passport = require('passport');
+const initializePassport = require('./passport-config');
+const flash = require('express-flash');
+const session = require('express-session');
+const methodOverride = require('method-override');
+const cors = require("cors");
 
-const passport = require('passport')
+// Additional requires for SQLite and file uploads
+const sqlite3 = require('sqlite3').verbose();
+const multer = require('multer');
 
-// require function then call it
-const initializePassport = require('./passport-config')
-
-const flash = require('express-flash')
-const session = require('express-session')
-
-const methodOverride = require('method-override')
-
-const cors = require("cors")
-// ============================================================================================================================================
-
-// get app variable from express
-const app = express()
+const app = express();
 const PORT = 5001;
 
-// calling this function inside passport-config
-// function for finding the user based on their email
+const users = [];
 initializePassport(
-    // passport that we are configuring
-    passport, 
-    email => users.find(user => user.email === email),
-    id => users.find(user => user.id === id)
-)
+  passport, 
+  email => users.find(user => user.email === email),
+  id => users.find(user => user.id === id)
+);
 
-// this is where you would use a data base to store the users
-const users = []
+const incidentDb = new sqlite3.Database('incidentReports.db', (err) => {
+  if (err) {
+    console.error("Could not open incidentReports.db", err);
+  } else {
+    console.log("Connected to the incidentReports database.");
+  }
+});
 
-app.use(express.json())
-app.use(cors({ origin: "http://localhost:5173", credentials: true }))
+// Create the incidents table (with coordinates) if it doesn't exist
+incidentDb.run(`CREATE TABLE IF NOT EXISTS incidents (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  description TEXT,
+  image_path TEXT,
+  lat REAL,
+  lng REAL,
+  created_at TEXT NOT NULL
+)`);
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function(req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+const upload = multer({ storage: storage });
+
+app.use(express.json());
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 app.use(session({
-    // key that will encrypt all of our information for us
-    secret: process.env.SESSION_SECRET,
-    resave: false, // should we resave our session variables if nothing has changed
-    saveUninitialized: false // do you want to save an empty value in this session if there is no value
-}))
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
 
-// function inside passport
-app.use(passport.initialize())
-app.use(passport.session()) // lets us store our variables to be persisted across the entire session our user has
-// app.use(methodOverride('_method')) 
+app.use(passport.initialize());
+app.use(passport.session());
+// app.use(methodOverride('_method'));
 
-// first thing we need to do is set up a route
 app.get('/', checkAuthenticated, (req, res) => {
-    res.json({ message: "Welcome to BruinWatch!" })
-})
+  res.json({ message: "Welcome to BruinWatch!" });
+});
 
-// need to create routes for both of the new files "login.ejs" and "register.ejs"
 app.get('/login', checkNotAuthenticated, (req, res) => {
-    res.json({ message: "Not authenticated", user: null })
-})
+  res.json({ message: "Not authenticated", user: null });
+});
 
 app.post("/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
-      if (err) return res.status(500).json({ message: "Server error. Please try again." });
-      if (!user) return res.status(401).json({ message: info.message }); // ✅ Send specific error message
-      req.login(user, (err) => {
-        if (err) return res.status(500).json({ message: "Login failed. Please try again." });
-        return res.json({ message: "Login successful", user });
-      });
-    })(req, res, next);
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return res.status(500).json({ message: "Server error. Please try again." });
+    if (!user) return res.status(401).json({ message: info.message });
+    req.login(user, (err) => {
+      if (err) return res.status(500).json({ message: "Login failed. Please try again." });
+      return res.json({ message: "Login successful", user });
+    });
+  })(req, res, next);
+});
+
+app.post('/register', checkNotAuthenticated, async (req, res) => {
+  const { email, password } = req.body;
+  if (users.find((user) => user.email === email)) {
+    return res.status(400).json({ message: "Email already exists" });
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  users.push({ id: users.length + 1, email, password: hashedPassword });
+  res.json({ message: "User registered successfully!" });
+  console.log(users);
+});
+
+// POST route to handle incident report submission (including coordinates)
+app.post('/report', upload.single('image'), (req, res) => {
+  const { title, description, lat, lng } = req.body;
+  
+  console.log("Received data:", {
+    title,
+    description,
+    lat: typeof lat === 'string' ? lat : 'undefined',
+    lng: typeof lng === 'string' ? lng : 'undefined',
+    imageReceived: req.file ? true : false
   });
   
-
-// Entire application for registering users
-// ==============================================================================================================================================
-// we are going to post to a route with the name /register inside of our server
-app.post('/register', checkNotAuthenticated, async (req, res) => { // async makes a function return a promise implicitly
-    const { email, password } = req.body;
+  // Parse lat and lng to ensure they're stored as numbers
+  const latitude = parseFloat(lat);
+  const longitude = parseFloat(lng);
   
-    if (users.find((user) => user.email === email)) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
+  // Log the parsed values
+  console.log("Parsed coordinates:", { 
+    latitude: isNaN(latitude) ? 'NaN' : latitude, 
+    longitude: isNaN(longitude) ? 'NaN' : longitude 
+  });
   
-    const hashedPassword = await bcrypt.hash(password, 10);
-    users.push({ id: users.length + 1, email, password: hashedPassword });
+  const imagePath = req.file ? req.file.path : null;
+  const createdAt = new Date().toISOString();
   
-    res.json({ message: "User registered successfully!" });
-
-    console.log(users)
-})
-// ==============================================================================================================================================
-
-// Logout Route (Only accessible if logged in)
-app.post("/logout", (req, res) => {
-    req.logout((err) => {
-      if (err) return res.status(500).json({ message: "Logout failed" });
+  // Validate coordinates before inserting
+  if (isNaN(latitude) || isNaN(longitude)) {
+    return res.status(400).json({ message: "Invalid coordinates provided" });
+  }
   
-      req.session.destroy((err) => {  // Ensure session is fully cleared
-        if (err) return res.status(500).json({ message: "Session destruction failed" });
-  
-        res.clearCookie("connect.sid");  // Clear session cookie
-        res.json({ message: "Logged out successfully" });
+  const sql = `INSERT INTO incidents (title, description, image_path, lat, lng, created_at) VALUES (?, ?, ?, ?, ?, ?)`;
+  incidentDb.run(sql, [title, description, imagePath, latitude, longitude, createdAt], function(err) {
+    if (err) {
+      console.error("Database error:", err);
+      res.status(500).json({ message: "Database insertion failed" });
+    } else {
+      res.json({ 
+        message: "Incident report saved", 
+        incidentId: this.lastID,
+        coordinates: { lat: latitude, lng: longitude }
       });
+    }
+  });
+});
+
+// New GET route to fetch all incident reports
+app.get('/reports', (req, res) => {
+  const sql = "SELECT * FROM incidents ORDER BY id DESC";
+  incidentDb.all(sql, [], (err, rows) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Error retrieving reports" });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+app.post("/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) return res.status(500).json({ message: "Logout failed" });
+    req.session.destroy((err) => {
+      if (err) return res.status(500).json({ message: "Session destruction failed" });
+      res.clearCookie("connect.sid");
+      res.json({ message: "Logged out successfully" });
     });
   });
-  
+});
 
-// Protected Home Route (Only accessible if logged in)
 app.get("/home", checkAuthenticated, (req, res) => {
-    res.json({ user: req.user });
-  });
+  res.json({ user: req.user });
+});
 
-  // app.get("/auth-status", (req, res) => {
-  //   if (req.isAuthenticated()) {
-  //     res.json({ authenticated: true, user: req.user });
-  //   } else {
-  //     res.status(401).json({ authenticated: false }); // ✅ Ensure proper 401 Unauthorized response
-  //   }
-  // });
-  
-// we don't want to allow non-logged-in users to access any information
-// this will protect all of our different routes for when we aren't logged in
-//                      request, response, next
 function checkAuthenticated(req, res, next) {
-    if(req.isAuthenticated()) {
-        return next()
-    }
-
-    res.status(401).json({ message: "Unauthorized - Please log in "})
+  if(req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "Unauthorized - Please log in " });
 }
 
-// we want to make sure that no user is logged in if we want to access these routes
-// next, once a user is logged in, we don't want them to be able to go back to the log in page
 function checkNotAuthenticated(req, res, next) {
-    if(req.isAuthenticated()) {
-        return res.status(403).json({ message: "Already logged in" })
-    }
-    next() // if they are not authenticated we want to continue on with the call
+  if(req.isAuthenticated()) {
+    return res.status(403).json({ message: "Already logged in" });
+  }
+  next();
 }
 
- // Start Server
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
