@@ -61,7 +61,7 @@ export default function HomePage() {
     <div>
       <ResponsiveAppBar />
       <div className="map-container">
-        <HomepageMap />
+        <HomepageMap incidents={previews} />
       </div>
       <div className="preview_overlay flex flex-col space-y-8">
         <h1>Latest Near You</h1>
