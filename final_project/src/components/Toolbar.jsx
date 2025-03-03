@@ -14,6 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { Link, useNavigate } from 'react-router-dom';
 import bear_with_glasses from '../assets/bear_with_glasses.jpg';
+import '../css/Toolbar.css';
 
 const pages = [
   { name: 'Report', path: '/report' },
@@ -57,18 +58,18 @@ function ResponsiveAppBar() {
   };
 
   return (
-    <AppBar position="fixed" sx={{ backgroundColor: '#5745ff', zIndex: 10 }}>
+    <AppBar position="fixed" sx={{ backgroundColor: '#7886C7', zIndex: 10 }}>
       <Container maxWidth="xl" disableGutters>
-        <Toolbar disableGutters sx={{ justifyContent: 'flex-start', paddingLeft: 0 }}>
+        <Toolbar disableGutters className='menuButton'>
           {/* Logo and Home link for larger screens */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mr: 2 }}>
             <img 
               src={bear_with_glasses}
               alt="Bear with Glasses"
-              style={{ width: '40px', height:'40px', marginRight:'9px' }}
+              className='bearImage'
             />
             <Typography
-              variant="h6"
+              variant="h5"
               noWrap
               component={Link}
               to="/home"
@@ -76,11 +77,11 @@ function ResponsiveAppBar() {
                 fontFamily: 'monospace',
                 fontWeight: 700,
                 letterSpacing: '.3rem',
-                color: '#9c3030',
+                color: '#9c3030', // Apply your color here
                 textDecoration: 'none',
               }}
             >
-              Home
+              BruinWatch
             </Typography>
           </Box>
 
@@ -127,7 +128,12 @@ function ResponsiveAppBar() {
 
           {/* Logo for smaller screens */}
           <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', flexGrow: 1 }}>
-            <AdbIcon sx={{ mr: 1 }} />
+              
+            <img 
+              src={bear_with_glasses}
+              alt="Bear with Glasses"
+              className='bearImage'
+            />
             <Typography
               variant="h5"
               noWrap
@@ -137,22 +143,22 @@ function ResponsiveAppBar() {
                 fontFamily: 'monospace',
                 fontWeight: 700,
                 letterSpacing: '.3rem',
-                color: 'inherit',
+                color: '#9c3030', // Apply your color here
                 textDecoration: 'none',
               }}
             >
-              LOGO
+              BruinWatch
             </Typography>
           </Box>
 
           {/* Pages for larger screens */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, ml: 2 }}>
-            {pages.map((page) => (
+            {pages.map((page, index) => (
               <Button
                 key={page.name}
                 component={Link}
                 to={page.path}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                sx={{ my: 2, color: 'white', display: 'block', ml: index > 0 ? 4 : 2}}
               >
                 {page.name}
               </Button>

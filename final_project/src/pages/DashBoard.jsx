@@ -2,7 +2,6 @@ import React from 'react';
 import '../css/Dashboard.css';
 import ResponsiveAppBar from "../components/Toolbar";
 
-
 const Dashboard = () => {
   return (
     <div className="dashboard">

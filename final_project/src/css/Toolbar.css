@@ -1,0 +1,11 @@
+
+
+
+.bearImage {
+    width: 45px; /* Adjusted from 40px to better align with the text size */
+    height: 45px;
+    margin-right: 12px; /* Increased margin for better spacing */
+    border-radius: 50%; /* Rounds the corners of the image */
+    border: 2px solid white; /* Optional: adds a white border */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional: adds a subtle shadow */
+}
