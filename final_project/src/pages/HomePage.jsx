@@ -2,14 +2,15 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import HomepageMap from "../components/MapHomepage";
 import { useState, useEffect } from "react";
 import ResponsiveAppBar from "../components/Toolbar";
-import Search from "../components/Search"; // Import Search component
+import Search from "../components/Search";
 
-function Preview({ title, description, lat, lng, image_path, created_at }) {
+function Preview({ title, description, lat, lng, image_path, created_at, id, onHover }) {
   const navigate = useNavigate();
   return (
     <div 
       className="preview_widget cursor-pointer"
-      onClick={() => navigate("/IncidentPage")}
+      onMouseEnter={() => onHover(id)}  // Trigger hover event when mouse enters
+      onMouseLeave={() => onHover(null)} // Reset hover state when mouse leaves
     >
       <h2>{title}</h2>
       {image_path && (
@@ -29,11 +30,13 @@ function Preview({ title, description, lat, lng, image_path, created_at }) {
   );
 }
 
+
 export default function HomePage() {
   const navigate = useNavigate();
   const [previews, setPreviews] = useState([]);
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
+  const [highlightedIncidentId, setHighlightedIncidentId] = useState(null);
 
   // Filter previews based on search term
   const filteredPreviews = previews.filter(preview =>
@@ -57,11 +60,19 @@ export default function HomePage() {
     }
   }, [location.state]);
 
+  // Function to handle hover event on preview
+  const handleHover = (id) => {
+    setHighlightedIncidentId(id); // Set the hovered incident id
+  };
+
   return (
     <div>
       <ResponsiveAppBar />
       <div className="map-container">
-        <HomepageMap incidents={previews} />
+        <HomepageMap 
+          incidents={previews} 
+          highlightedIncidentId={highlightedIncidentId} // Pass hover state to map
+        />
       </div>
       <div className="preview_overlay flex flex-col space-y-8">
         <h1>Latest Near You</h1>
@@ -69,8 +80,12 @@ export default function HomePage() {
         <Search onSearch={setSearchTerm} />
         
         <div className="preview_list">
-          {filteredPreviews.map((preview, index) => (
-            <Preview key={index} {...preview} />
+          {filteredPreviews.map((preview) => (
+            <Preview 
+              key={preview.id}
+              {...preview}  
+              onHover={handleHover} // Pass hover handler to Preview
+            />
           ))}
         </div>
       </div>
