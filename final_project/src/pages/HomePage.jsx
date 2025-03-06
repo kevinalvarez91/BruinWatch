@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import ResponsiveAppBar from "../components/Toolbar";
 import Search from "../components/Search";
 
-function Preview({ title, description, lat, lng, image_path, created_at, id, onHover }) {
+function Preview({ title, description, location, lat, lng, image_path, created_at, id, onHover }) {
   const navigate = useNavigate();
   return (
     <div 
@@ -21,6 +21,7 @@ function Preview({ title, description, lat, lng, image_path, created_at, id, onH
         />
       )}
       <p>{description}</p>
+      <p><strong>Location: </strong>{location}</p>
       <p><strong>Coordinates: </strong>{lat}, {lng}</p>
       <p><strong>Reported at: </strong>{new Date(created_at).toLocaleString()}</p>
       <Link to="/IncidentPage" className="p-2 bg-blue-500 text-white rounded">

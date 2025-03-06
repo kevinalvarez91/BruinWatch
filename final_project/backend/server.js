@@ -46,6 +46,7 @@ incidentDb.run(`CREATE TABLE IF NOT EXISTS incidents (
   title TEXT NOT NULL,
   description TEXT,
   image_path TEXT,
+  location TEXT,
   lat REAL,
   lng REAL,
   created_at TEXT NOT NULL
@@ -108,11 +109,12 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
 
 // POST route to handle incident report submission (including coordinates)
 app.post('/report', upload.single('image'), (req, res) => {
-  const { title, description, lat, lng } = req.body;
+  const { title, description, location, lat, lng } = req.body;
   
   console.log("Received data:", {
     title,
     description,
+    location,
     lat: typeof lat === 'string' ? lat : 'undefined',
     lng: typeof lng === 'string' ? lng : 'undefined',
     imageReceived: req.file ? true : false
@@ -136,8 +138,8 @@ app.post('/report', upload.single('image'), (req, res) => {
     return res.status(400).json({ message: "Invalid coordinates provided" });
   }
   
-  const sql = `INSERT INTO incidents (title, description, image_path, lat, lng, created_at) VALUES (?, ?, ?, ?, ?, ?)`;
-  incidentDb.run(sql, [title, description, imagePath, latitude, longitude, createdAt], function(err) {
+  const sql = `INSERT INTO incidents (title, description, image_path, location, lat, lng, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  incidentDb.run(sql, [title, description, imagePath, location, latitude, longitude, createdAt], function(err) {
     if (err) {
       console.error("Database error:", err);
       res.status(500).json({ message: "Database insertion failed" });
@@ -145,6 +147,7 @@ app.post('/report', upload.single('image'), (req, res) => {
       res.json({ 
         message: "Incident report saved", 
         incidentId: this.lastID,
+        location: location,
         coordinates: { lat: latitude, lng: longitude }
       });
     }
