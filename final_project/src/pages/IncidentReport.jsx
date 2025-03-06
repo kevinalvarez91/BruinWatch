@@ -25,24 +25,22 @@ const Report = () => {
 
   const handleSubmit = async () => {    
     console.log("Coordinates before sending:", coordinates);
-    
+      
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
-      
-    // Make sure coordinates exist and are properly formatted before sending
+  
     if (coordinates) {
-      // Convert to string to ensure proper transmission
-      const latVal = Array.isArray(coordinates) ? coordinates[0] : coordinates.lat;
-      const lngVal = Array.isArray(coordinates) ? coordinates[1] : coordinates.lng;
-        
-      // Debug - check values
-      console.log("Sending lat:", latVal, "lng:", lngVal);
-        
-      // Only append if they're actually numbers
+      const latVal = coordinates?.lat ? parseFloat(coordinates.lat).toFixed(4) : null;
+      const lngVal = coordinates?.lng ? parseFloat(coordinates.lng).toFixed(4) : null;
+      const locationName = coordinates?.location.split(', Los Angeles County')[0] || "Unknown Location";
+  
+      console.log("Sending lat:", latVal, "lng:", lngVal, "location:", locationName);
+          
       if (!isNaN(latVal) && !isNaN(lngVal)) {
         formData.append("lat", latVal.toString());
         formData.append("lng", lngVal.toString());
+        formData.append("location", locationName);
       } else {
         alert("Please select a valid location on the map");
         return;
@@ -51,7 +49,7 @@ const Report = () => {
       alert("Please mark a location on the map");
       return;
     }
-    
+      
     if (image) {
       formData.append("image", image);
     }
@@ -61,27 +59,39 @@ const Report = () => {
         method: "POST",
         body: formData,
       });
+  
+      // **Fix: Ensure we parse JSON response properly**
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonError) {
+        console.error("Failed to parse JSON response:", jsonError);
+        alert("Unexpected server response. Please try again.");
+        return;
+      }
+  
+      console.log("Server response:", data);
+  
       if (res.ok) {
-        const data = await res.json();
         alert("Incident Reported successfully!");
-        
-        // Include actual coordinates in the preview
+  
         const newPreview = {
           title: title,
           description: description,
-          lat: Array.isArray(coordinates) ? coordinates[0] : coordinates.lat,
-          lng: Array.isArray(coordinates) ? coordinates[1] : coordinates.lng,
+          location: coordinates?.location,
+          lat: coordinates?.lat,
+          lng: coordinates?.lng,
           created_at: new Date().toISOString()
         };
-        
+  
         navigate("/home", { state: { newPreview } });
       } else {
-        const errorData = await res.json();
-        alert(`Failed to report incident: ${errorData.message || "Unknown error"}`);
+        console.error("Server reported an error:", data);
+        alert(`Failed to report incident: ${data.message || "Unknown error"}`);
       }
     } catch (error) {
-      console.error(error);
-      alert("Error reporting incident.");
+      console.error("Error reporting incident:", error);
+      alert("A network error occurred. Please try again.");
     }
   };
 
@@ -90,7 +100,10 @@ const Report = () => {
       <ResponsiveAppBar />
       {/* Full-screen map */}
       <div className="map-container">
-        <MyMap onLocationSelect={setCoordinates} />
+        <MyMap onLocationSelect={(locationData) => {
+            console.log("Received location:", locationData);
+            setCoordinates(locationData);
+        }} />
       </div>
 
       {/* Overlay for the form (on the left side) */}

@@ -5,21 +5,41 @@ import 'leaflet/dist/leaflet.css';
 function MyMap({ onLocationSelect }) {
   // State to store marker position
   const [position, setPosition] = useState([34.0689, -118.4452]);
+  const [locationName, setLocationName] = useState('Fetching location...');
+  
+  const fetchLocationName = async ([lat, lng]) => {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await response.json();
+      if (data && data.display_name) {
+        let formattedLocation = data.display_name.split(', Los Angeles County')[0];
+        setLocationName(formattedLocation);
+        onLocationSelect({ lat, lng, location: data.display_name });
+      } else {
+        setLocationName('Unknown location');
+        onLocationSelect({ lat, lng, location: 'Unknown location' });
+      }
+    } catch (error) {
+      setLocationName('Error fetching location');
+      onLocationSelect({ lat, lng, location: 'Error fetching location' });
+    }
+  };
 
   // When position changes, pass it to the parent component
   useEffect(() => {
-    if (position && onLocationSelect) {
-      onLocationSelect(position);
+    if (position) {
+      fetchLocationName(position);
     }
-  }, [position, onLocationSelect]);
+  }, [position]);
 
   // Function to handle drag end and update position
+
+
   const handleDragEnd = (event) => {
     const newPos = event.target.getLatLng();
     setPosition([newPos.lat, newPos.lng]);
   };
 
-  // Component to handle map clicks
   function MapClickHandler() {
     useMapEvents({
       click: (e) => {
@@ -48,12 +68,12 @@ function MyMap({ onLocationSelect }) {
         eventHandlers={{ dragend: handleDragEnd }}
       >
         <Popup>
-          Report an Incident <br />
+          <b>Report an Incident</b> <br />
+          Location: {locationName} <br />
           Coords: {position[0].toFixed(4)}, {position[1].toFixed(4)}
         </Popup>
       </Marker>
 
-      {/* Allow clicking on the map to place marker */}
       <MapClickHandler />
     </MapContainer>
   );
