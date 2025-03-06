@@ -42,7 +42,8 @@ export default function HomePage() {
   // Filter previews based on search term
   const filteredPreviews = previews.filter(preview =>
     (preview.description && preview.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (preview.title && preview.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    (preview.title && preview.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (preview.location && preview.location.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   useEffect(() => {
