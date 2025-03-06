@@ -18,8 +18,7 @@ import '../css/Toolbar.css';
 
 const pages = [
   { name: 'Report', path: '/report' },
-  { name: 'Contact', path: '/contact' },
-  { name: 'Logout', path: '/' }
+  { name: 'Contact', path: '/contact' }
 ];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
