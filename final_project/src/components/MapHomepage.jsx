@@ -15,8 +15,8 @@ function HomepageMap({ incidents, highlightedIncidentId }) {
 }
 
 function MapContent({ incidents, highlightedIncidentId }) {
-  const map = useMap();
   const markersRef = useRef({});
+  const map = useMap();
 
   useEffect(() => {
     if (highlightedIncidentId) {
@@ -24,13 +24,17 @@ function MapContent({ incidents, highlightedIncidentId }) {
       if (highlightedIncident) {
         const { lat, lng } = highlightedIncident;
         map.flyTo([lat, lng], 15);
-        if (markersRef.current[highlightedIncident.id]) {
+        if (markersRef.current && markersRef.current[highlightedIncident.id]) {
           markersRef.current[highlightedIncident.id].openPopup();
         }
       }
     } else {
-      // Close any open popups when highlight is removed
-      Object.values(markersRef.current).forEach(marker => marker.closePopup());
+      // Ensure markersRef.current exists before calling closePopup()
+      if (markersRef.current) {
+        Object.values(markersRef.current).forEach(marker => {
+          if (marker) marker.closePopup(); // ✅ Ensure the marker is valid before calling closePopup()
+        });
+      }
     }
   }, [highlightedIncidentId, incidents, map]);
 
@@ -44,11 +48,13 @@ function MapContent({ incidents, highlightedIncidentId }) {
       />
 
       {incidents.map((incident) => (
-        <Marker key={incident.id} position={[incident.lat, incident.lng]}
-        ref = {(el) => {markersRef.current[incident.id] = el; }}
+        <Marker
+          key={incident.id} // ✅ Ensure each marker has a unique key
+          position={[incident.lat, incident.lng]}
+          ref={(el) => markersRef.current[incident.id] = el}
         >
           <Popup>
-            {incident.title} <br />
+            <b>{incident.title}</b>
           </Popup>
         </Marker>
       ))}

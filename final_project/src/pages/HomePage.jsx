@@ -66,20 +66,21 @@ export default function HomePage() {
 
   // Filter previews based on search term
   const sortedPreviews = previews
-    .map((preview) => {
-      if (userLocation) {
-        const distance = getDistance(userLocation.lat, userLocation.lng, preview.lat, preview.lng);
-        return { ...preview, distance };
-      }
-      return { ...preview, distance: Infinity };
-    })
-    .sort((a, b) => {
-      if (sortBy === "location") {
-        return a.distance - b.distance;
-      } else {
-        return new Date(b.created_at) - new Date(a.created_at);
-      }
-    });
+  .map((preview) => {
+    if (userLocation && preview.lat !== undefined && preview.lng !== undefined) {
+      const distance = getDistance(userLocation.lat, userLocation.lng, preview.lat, preview.lng);
+      return { ...preview, distance };
+    }
+    return { ...preview, distance: Infinity }; // Default distance when user location is unavailable
+  })
+  .filter(preview => preview.distance !== undefined && preview.distance !== null) // Ensure valid distances
+  .sort((a, b) => {
+    if (sortBy === "location") {
+      return a.distance - b.distance; // Sort by nearest first
+    } else {
+      return new Date(b.created_at || 0) - new Date(a.created_at || 0); // Ensure valid date comparison
+    }
+  });
 
   const filteredPreviews = sortedPreviews.filter(preview =>
     (preview.description && preview.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
