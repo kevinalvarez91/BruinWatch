@@ -4,6 +4,21 @@ import { useState, useEffect } from "react";
 import ResponsiveAppBar from "../components/Toolbar";
 import Search from "../components/Search";
 
+function timeSince(date) {
+  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+  let interval = Math.floor(seconds / 31536000);
+  if (interval > 1) return `${interval} years ago`;
+  interval = Math.floor(seconds / 2592000);
+  if (interval > 1) return `${interval} months ago`;
+  interval = Math.floor(seconds / 86400);
+  if (interval > 1) return `${interval} days ago`;
+  interval = Math.floor(seconds / 3600);
+  if (interval > 1) return `${interval} hours ago`;
+  interval = Math.floor(seconds / 60);
+  if (interval > 1) return `${interval} minutes ago`;
+  return "Just now";
+}
+
 function Preview({ title, description, location, lat, lng, image_path, created_at, id, distance, onHover }) {
   const navigate = useNavigate();
   const handleClick = () => {
@@ -31,6 +46,7 @@ function Preview({ title, description, location, lat, lng, image_path, created_a
         <p><strong>Distance: </strong>{distance.toFixed(2)} km</p>
       )}
       <p><strong>Reported at: </strong>{new Date(created_at).toLocaleString()}</p>
+      <p className="reported-time">{timeSince(created_at)}</p>
       {/* <Link to={`/incident/${id}`} className="p-2 bg-blue-500 text-white rounded">
         Details
       </Link> */}
