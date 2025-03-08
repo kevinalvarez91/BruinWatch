@@ -181,7 +181,24 @@ app.post("/logout", (req, res) => {
 app.get("/home", checkAuthenticated, (req, res) => {
   res.json({ user: req.user });
 });
+// GET route to fetch a single incident by ID
+app.get('/reports/:id', (req, res) => {
+  const { id } = req.params;
 
+  const sql = "SELECT * FROM incidents WHERE id = ?";
+  incidentDb.get(sql, [id], (err, row) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Error retrieving incident" });
+    } else if (!row) {
+      res.status(404).json({ message: "Incident not found" });
+    } else {
+      res.json(row);
+    }
+  });
+});
+//handles non accessible files
+app.use('/uploads', express.static('uploads'));
 function checkAuthenticated(req, res, next) {
   if(req.isAuthenticated()) {
     return next();

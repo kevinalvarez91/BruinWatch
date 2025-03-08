@@ -17,6 +17,7 @@ import "./css/index.css"; // Ensure styles are applied
 console.log("main.jsx is running!"); // Debugging log
 
 const App = () => {
+  
   console.log("App is rendering!"); // Debugging log
   return (
     <Router>
@@ -28,7 +29,7 @@ const App = () => {
         <Route path="*" element={<LoginPage />} /> { /* redirect unknown routes to login page */ }
         <Route path="/contact" element={<Contact />} />
         <Route path="/report" element={<Report />} />
-        <Route path="/IncidentPage" element={<IncidentPage />} />
+        <Route path="/incident/:incidentId" element={<IncidentPage />} />
         <Route path="/Profile" element={<Profile />} />
         <Route path="/Dashboard" element={<DashBoard/>} />
         <Route path="/Account" element={<Account />} />

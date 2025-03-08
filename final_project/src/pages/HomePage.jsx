@@ -27,7 +27,7 @@ function Preview({ title, description, location, lat, lng, image_path, created_a
         <p><strong>Distance: </strong>{distance.toFixed(2)} km</p>
       )}
       <p><strong>Reported at: </strong>{new Date(created_at).toLocaleString()}</p>
-      <Link to="/IncidentPage" className="p-2 bg-blue-500 text-white rounded">
+      <Link to={`/incident/${id}`} className="p-2 bg-blue-500 text-white rounded">
         Details
       </Link>
     </div>
