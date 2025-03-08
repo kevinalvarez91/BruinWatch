@@ -6,9 +6,13 @@ import Search from "../components/Search";
 
 function Preview({ title, description, location, lat, lng, image_path, created_at, id, distance, onHover }) {
   const navigate = useNavigate();
+  const handleClick = () => {
+    navigate(`/incident/${id}`);
+  }
   return (
     <div 
       className="preview_widget cursor-pointer"
+      onClick = {handleClick}
       onMouseEnter={() => onHover(id)}  // Trigger hover event when mouse enters
       onMouseLeave={() => onHover(null)} // Reset hover state when mouse leaves
     >
@@ -22,14 +26,14 @@ function Preview({ title, description, location, lat, lng, image_path, created_a
       )}
       <p>{description}</p>
       <p><strong>Location: </strong>{location}</p>
-      <p><strong>Coordinates: </strong>{lat}, {lng}</p>
+      {/* <p><strong>Coordinates: </strong>{lat}, {lng}</p> */}
       {distance !== undefined && distance !== Infinity && (
         <p><strong>Distance: </strong>{distance.toFixed(2)} km</p>
       )}
       <p><strong>Reported at: </strong>{new Date(created_at).toLocaleString()}</p>
-      <Link to={`/incident/${id}`} className="p-2 bg-blue-500 text-white rounded">
+      {/* <Link to={`/incident/${id}`} className="p-2 bg-blue-500 text-white rounded">
         Details
-      </Link>
+      </Link> */}
     </div>
   );
 }
