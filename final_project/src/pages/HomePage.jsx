@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import ResponsiveAppBar from "../components/Toolbar";
 import Search from "../components/Search";
 
-function Preview({ title, description, location, lat, lng, image_path, created_at, id, onHover }) {
+function Preview({ title, description, location, lat, lng, image_path, created_at, id, distance, onHover }) {
   const navigate = useNavigate();
   return (
     <div 
@@ -23,6 +23,9 @@ function Preview({ title, description, location, lat, lng, image_path, created_a
       <p>{description}</p>
       <p><strong>Location: </strong>{location}</p>
       <p><strong>Coordinates: </strong>{lat}, {lng}</p>
+      {distance !== undefined && distance !== Infinity && (
+        <p><strong>Distance: </strong>{distance.toFixed(2)} km</p>
+      )}
       <p><strong>Reported at: </strong>{new Date(created_at).toLocaleString()}</p>
       <Link to="/IncidentPage" className="p-2 bg-blue-500 text-white rounded">
         Details
@@ -38,13 +41,56 @@ export default function HomePage() {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [highlightedIncidentId, setHighlightedIncidentId] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
 
   // Filter previews based on search term
-  const filteredPreviews = previews.filter(preview =>
+  const filteredPreviews = previews
+  .map((preview) => {
+    if (userLocation) {
+      const distance = getDistance(userLocation.lat, userLocation.lng, preview.lat, preview.lng);
+      return { ...preview, distance };
+    }
+    return { ...preview, distance: Infinity };
+  })
+  .sort((a, b) => a.distance - b.distance)
+  .filter(preview =>
     (preview.description && preview.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (preview.title && preview.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (preview.location && preview.location.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  useEffect(()=>{
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          console.log("user's location: ", position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          console.error("error when fetching user location:", error);
+        }
+      );
+    }
+    else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }, []);
+
+  function getDistance(user_lat, user_lng, incident_lat, incident_lng){
+    const toRad = (value) => (value * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(incident_lat - user_lat);
+    const dLon = toRad(incident_lng - user_lng);
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(user_lat)) * Math.cos(toRad(incident_lat)) * 
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
 
   useEffect(() => {
     // Fetch incident reports from the server
@@ -82,11 +128,11 @@ export default function HomePage() {
         <Search onSearch={setSearchTerm} />
         
         <div className="preview_list">
-          {filteredPreviews.map((preview) => (
+        {filteredPreviews.map((preview) => (
             <Preview 
               key={preview.id}
               {...preview}  
-              onHover={handleHover} // Pass hover handler to Preview
+              onHover={handleHover} // handle hover
             />
           ))}
         </div>
