@@ -158,3 +158,40 @@ h1 {
     gap: 10px; /* Adds space between buttons */
     margin-top: 20px;
 }
+.vote-history {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .vote-line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    height: 10px;
+    width: 250px;
+    background-color: #ddd;
+    border-radius: 5px;
+    margin: 10px auto;
+    position: relative;
+  }
+  
+  .vote-marker {
+    width: 10px;
+    height: 20px;
+    background-color: blue;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .vote-marker.active {
+    background-color: red;
+  }
+  
+  .vote-marker.resolved {
+    background-color: green;
+  }
+  
+  .vote-marker:hover {
+    transform: scale(1.5);
+  }

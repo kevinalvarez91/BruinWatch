@@ -9,6 +9,7 @@ const IncidentPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isResolved, setIsResolved] = useState(false);
+  const [votes, setVotes] = useState([]);
   const [commentData, setCommentData] = useState({
     commentText: "",
     comments: []
@@ -31,11 +32,31 @@ const IncidentPage = () => {
         setError(error.message);
         setLoading(false);
       });
-  }, [incidentId]);
 
-  const handleResolvedClick = () => {
-    setIsResolved(true);
+      //fetching the last 5 votes 
+      fetch(`http://localhost:5001/incident/${incidentId}/votes`)
+      .then((response) => response.json())
+      .then((data) => setVotes(data))
+      .catch((error) => console.error("Error fetching votes:", error));
+  }, [incidentId]);
+  //handling vote submission 
+
+  const submitVote = (status) => {
+    fetch(`http://localhost:5001/incident/${incidentId}/vote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    })
+      .then((response) => response.json())
+      .then(() => {
+        // Refresh the vote list after submitting
+        fetch(`http://localhost:5001/incident/${incidentId}/votes`)
+          .then((response) => response.json())
+          .then((data) => setVotes(data));
+      })
+      .catch((error) => console.error("Error submitting vote:", error));
   };
+
 
   if (loading) return <p>Loading incident details...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -64,19 +85,31 @@ const IncidentPage = () => {
         {/* Resolved/Active Buttons */}
         <div className="button-container">
           <button
-            className={`active-button ${!isResolved ? "active" : ""}`}
-            onClick={() => setIsResolved(false)}
+            className="active-button"
+            onClick={() => submitVote("active")}
           >
             Active
           </button>
           <button
-            className={`resolved-button ${isResolved ? "resolved" : ""}`}
-            onClick={handleResolvedClick}
+            className="resolved-button"
+            onClick={() => submitVote("resolved")}
           >
             Resolved
           </button>
         </div>
-
+        {/*the history of all the votes*/}
+        <div className="vote-history">
+          <p>Recent Votes:</p>
+          <div className="vote-line">
+            {votes.map((vote, index) => (
+              <div
+                key={index}
+                className={`vote-marker ${vote.status}`}
+                title={`Voted ${vote.status} at ${new Date(vote.voted_at).toLocaleTimeString()}`}
+              />
+            ))}
+          </div>
+        </div>
         {/* Comment Section */}
         <div className="comment-section">
           <p>Roar Board</p>
