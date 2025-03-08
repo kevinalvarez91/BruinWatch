@@ -51,7 +51,13 @@ incidentDb.run(`CREATE TABLE IF NOT EXISTS incidents (
   lng REAL,
   created_at TEXT NOT NULL
 )`);
-
+//adding a database for the resolved feateure 
+incidentDb.run(`CREATE TABLE IF NOT EXISTS votes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  incident_id INTEGER NOT NULL,
+  status TEXT CHECK(status IN ('active', 'resolved')) NOT NULL,
+  voted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+)`);
 // Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
@@ -66,6 +72,39 @@ const upload = multer({ storage: storage });
 
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+
+//app.use and get API for the resolved feature 
+//this is to keep track of the user votes
+app.post('/incident/:id/vote', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body; // "active" or "resolved"
+
+  if (!["active", "resolved"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
+
+  const sql = `INSERT INTO votes (incident_id, status, voted_at) VALUES (?, ?, CURRENT_TIMESTAMP)`;
+  incidentDb.run(sql, [id, status], function (err) {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Database insertion failed" });
+    }
+    res.json({ message: "Vote recorded", voteId: this.lastID });
+  });
+});
+//fetching the last 5 votes to display them 
+app.get('/incident/:id/votes', (req, res) => {
+  const { id } = req.params;
+
+  const sql = `SELECT status, voted_at FROM votes WHERE incident_id = ? ORDER BY voted_at DESC LIMIT 5`;
+  incidentDb.all(sql, [id], (err, rows) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Error retrieving votes" });
+    }
+    res.json(rows);
+  });
+});
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
