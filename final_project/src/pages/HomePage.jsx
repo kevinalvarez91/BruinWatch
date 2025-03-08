@@ -42,18 +42,26 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [highlightedIncidentId, setHighlightedIncidentId] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+  const [sortBy, setSortBy] = useState("time");
 
   // Filter previews based on search term
-  const filteredPreviews = previews
-  .map((preview) => {
-    if (userLocation) {
-      const distance = getDistance(userLocation.lat, userLocation.lng, preview.lat, preview.lng);
-      return { ...preview, distance };
-    }
-    return { ...preview, distance: Infinity };
-  })
-  .sort((a, b) => a.distance - b.distance)
-  .filter(preview =>
+  const sortedPreviews = previews
+    .map((preview) => {
+      if (userLocation) {
+        const distance = getDistance(userLocation.lat, userLocation.lng, preview.lat, preview.lng);
+        return { ...preview, distance };
+      }
+      return { ...preview, distance: Infinity };
+    })
+    .sort((a, b) => {
+      if (sortBy === "location") {
+        return a.distance - b.distance;
+      } else {
+        return new Date(b.created_at) - new Date(a.created_at);
+      }
+    });
+
+  const filteredPreviews = sortedPreviews.filter(preview =>
     (preview.description && preview.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (preview.title && preview.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (preview.location && preview.location.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -126,7 +134,13 @@ export default function HomePage() {
         <h1>Latest Near You</h1>
         
         <Search onSearch={setSearchTerm} />
-        
+        <div>
+          <label>Sort by: </label>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="location">Nearest</option>
+            <option value="time">Most Recent</option>
+          </select>
+        </div>
         <div className="preview_list">
         {filteredPreviews.map((preview) => (
             <Preview 

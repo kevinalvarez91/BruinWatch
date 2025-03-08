@@ -28,6 +28,9 @@ function MapContent({ incidents, highlightedIncidentId }) {
           markersRef.current[highlightedIncident.id].openPopup();
         }
       }
+    } else {
+      // Close any open popups when highlight is removed
+      Object.values(markersRef.current).forEach(marker => marker.closePopup());
     }
   }, [highlightedIncidentId, incidents, map]);
 
