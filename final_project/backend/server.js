@@ -58,6 +58,20 @@ incidentDb.run(`CREATE TABLE IF NOT EXISTS votes (
   status TEXT CHECK(status IN ('active', 'resolved')) NOT NULL,
   voted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )`);
+//Database for the comment section 
+incidentDb.run(`CREATE TABLE IF NOT EXISTS comments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  incident_id INTEGER NOT NULL,
+  user_email TEXT NOT NULL,  -- Store the user's email
+  user_name TEXT NOT NULL,  -- Store the username
+  user_profile TEXT,  -- Store user profile image URL
+  text TEXT NOT NULL,
+  likes INTEGER DEFAULT 0,
+  dislikes INTEGER DEFAULT 0,
+  parent_comment_id INTEGER DEFAULT NULL, -- Allows replies
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+)`);
+
 // Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
@@ -72,7 +86,61 @@ const upload = multer({ storage: storage });
 
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+//fetch comments for an incident 
+app.get('/incident/:id/comments',(req,res)=>{
+  const{id} = req.params;
+  const sql =`SELECT * FROM comments WHERE incident_id = ? ORDER BY created_at DESC`;
 
+  incidentDb.all(sql,[id],(err,rows) => {
+    if(err){
+      console.error("Database error:",err);
+      return res.status(500).json({message: "Error retrieving comments" });
+    }
+    res.json(rows);
+  });
+
+});
+//action for posting a new comment 
+app.post('/incident/:id/comment', (req, res) => {
+  const { id } = req.params;
+  const { user_email, user_name, user_profile, text, parent_comment_id } = req.body;
+
+  // Debugging: Log received comment data
+  console.log("🛠️ Received comment data:", req.body);
+
+  if (!user_email || !user_name || !text) {
+    console.error("❌ Missing required fields:", { user_email, user_name, text });
+    return res.status(400).json({ message: "Missing required fields." });
+  }
+
+  const sql = `INSERT INTO comments (incident_id, user_email, user_name, user_profile, text, parent_comment_id, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`;
+
+  incidentDb.run(sql, [id, user_email, user_name, user_profile, text, parent_comment_id || null], function (err) {
+    if (err) {
+      console.error("❌ Database error:", err);
+      return res.status(500).json({ message: "Failed to post comment" });
+    }
+    res.json({ message: "✅ Comment added", commentId: this.lastID });
+  });
+});
+//now to like and dislike comments 
+app.post('/comment/:commentId/react', (req, res) => {
+  const { commentId } = req.params;
+  const { type } = req.body; // "like" or "dislike"
+
+  let column = type === "like" ? "likes" : "dislikes";
+  const sql = `UPDATE comments SET ${column} = ${column} + 1 WHERE id = ?`;
+
+  incidentDb.run(sql, [commentId], function (err) {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Failed to update reaction" });
+    }
+    res.json({ message: `${type} added` });
+  });
+});
+//end of comment section 
 //app.use and get API for the resolved feature 
 //this is to keep track of the user votes
 app.post('/incident/:id/vote', (req, res) => {
