@@ -408,3 +408,57 @@
       margin-top: 40px;
     }
   }
+/*adding a liking feature that looks good*/
+  .heart-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    padding: 6px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #555;
+    transition: transform 0.2s;
+  }
+  
+  .heart-button:hover {
+    transform: scale(1.05);
+    background-color:white;
+  }
+  
+  .heart-icon {
+    display: inline-block;
+    font-size: 20px;
+    position: relative;
+    transition: transform 0.1s ease;
+  }
+  
+  /* Animation for the heart when clicked */
+  .heart-animation {
+    animation: heartBeat 1s ease;
+  }
+  
+  @keyframes heartBeat {
+    0% {
+      transform: scale(1);
+    }
+    15% {
+      transform: scale(1.25);
+    }
+    30% {
+      transform: scale(1);
+    }
+    45% {
+      transform: scale(1.25);
+    }
+    60% {
+      transform: scale(1);
+    }
+  }
+  
+  /* Styling for filled hearts when the comment is already liked */
+  .heart-filled {
+    color: #e74c3c;
+  } 
+  /*end of liking feature*/
