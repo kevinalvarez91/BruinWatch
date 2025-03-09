@@ -463,8 +463,23 @@
   } 
   /*end of liking feature*/
   /*disliking feature */
-  .dislike-animation {
-    animation: dislike-pop 0.5s ease;
+  .dislike-button {
+    background-color: white;
+   
+    color: black; /* Ensure text/icons remain visible */
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s ease-in-out;
+  }
+  
+  .dislike-button:hover {
+    background-color: white;
+    transform: scale(1.05); /* Slight enlargement effect */
+  }
+  
+  .dislike-filled {
+    color: red; /* If the user has already disliked */
   }
   
   @keyframes dislike-pop {
