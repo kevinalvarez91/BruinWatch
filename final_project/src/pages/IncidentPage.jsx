@@ -1,21 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import ResponsiveAppBar from "../components/Toolbar";
 import "../css/IncidentPage.css";
 
 const IncidentPage = () => {
-  const { incidentId } = useParams(); // Get the ID from the URL
+  const { incidentId } = useParams();
   const [incident, setIncident] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isResolved, setIsResolved] = useState(false);
   const [votes, setVotes] = useState([]);
-  const [commentData, setCommentData] = useState({
-    commentText: "",
-    comments: []
-  });
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState("");
+  const commentSectionRef = useRef(null);
+  const mainContentRef = useRef(null);
+  const scrollPositionRef = useRef(0);
 
   useEffect(() => {
+    // Fetch the logged-in user
+    fetch("http://localhost:5001/home", { credentials: "include" })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.user) setCurrentUser(data.user);
+      })
+      .catch((error) => console.error("Error fetching user:", error));
+
+    // Fetch incident details
     fetch(`http://localhost:5001/reports/${incidentId}`)
       .then((response) => {
         if (!response.ok) {
@@ -33,15 +45,42 @@ const IncidentPage = () => {
         setLoading(false);
       });
 
-      //fetching the last 5 votes 
-      fetch(`http://localhost:5001/incident/${incidentId}/votes`)
+    // Fetch last 5 votes
+    fetch(`http://localhost:5001/incident/${incidentId}/votes`)
       .then((response) => response.json())
       .then((data) => setVotes(data))
       .catch((error) => console.error("Error fetching votes:", error));
+
+    // Fetch comments
+    fetch(`http://localhost:5001/incident/${incidentId}/comments`)
+      .then((response) => response.json())
+      .then((data) => setComments(data))
+      .catch((error) => console.error("Error fetching comments:", error));
   }, [incidentId]);
-  //handling vote submission 
+
+  // Save scroll position before any state update that might cause rerender
+  useEffect(() => {
+    const handleScroll = () => {
+      scrollPositionRef.current = window.scrollY;
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+  
+  // Restore scroll position after render
+  useEffect(() => {
+    if (scrollPositionRef.current > 0) {
+      window.scrollTo(0, scrollPositionRef.current);
+    }
+  }, [comments, votes, incident]);
 
   const submitVote = (status) => {
+    const currentScrollPosition = window.scrollY;
+    
     fetch(`http://localhost:5001/incident/${incidentId}/vote`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -49,14 +88,93 @@ const IncidentPage = () => {
     })
       .then((response) => response.json())
       .then(() => {
-        // Refresh the vote list after submitting
         fetch(`http://localhost:5001/incident/${incidentId}/votes`)
           .then((response) => response.json())
-          .then((data) => setVotes(data));
+          .then((data) => {
+            setVotes(data);
+            // Restore scroll position after state update
+            setTimeout(() => window.scrollTo(0, currentScrollPosition), 0);
+          });
       })
       .catch((error) => console.error("Error submitting vote:", error));
   };
 
+  const postComment = (text, parentCommentId = null) => {
+    if (!currentUser) {
+      alert("You must be logged in to comment.");
+      return;
+    }
+
+    // Save current scroll position
+    const currentScrollPosition = window.scrollY;
+
+    const newComment = {
+      user_email: currentUser.email,
+      user_name: currentUser.email.split("@")[0],
+      user_profile: `https://i.pravatar.cc/40?u=${currentUser.email}`,
+      text,
+      parent_comment_id: parentCommentId,
+    };
+
+    fetch(`http://localhost:5001/incident/${incidentId}/comment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newComment),
+    })
+      .then(() => fetch(`http://localhost:5001/incident/${incidentId}/comments`))
+      .then((response) => response.json())
+      .then((data) => {
+        setCommentText("");
+        setReplyText("");
+        setReplyingTo(null);
+        setComments(data);
+        
+        // Restore scroll position after state update and DOM changes
+        setTimeout(() => window.scrollTo(0, currentScrollPosition), 0);
+      })
+      .catch((error) => console.error("Error posting comment:", error));
+  };
+
+  const handleReply = (commentId) => {
+    // Save scroll position
+    const currentScrollPosition = window.scrollY;
+    
+    if (replyingTo === commentId) {
+      setReplyingTo(null);
+      setReplyText("");
+    } else {
+      setReplyingTo(commentId);
+      setReplyText("");
+    }
+    
+    // Restore scroll position after the reply form appears/disappears
+    setTimeout(() => window.scrollTo(0, currentScrollPosition), 0);
+  };
+
+  const submitReply = (parentCommentId) => {
+    if (replyText.trim()) {
+      postComment(replyText, parentCommentId);
+    }
+  };
+
+  const reactToComment = (commentId, type) => {
+    // Save scroll position
+    const currentScrollPosition = window.scrollY;
+    
+    fetch(`http://localhost:5001/comment/${commentId}/react`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type }),
+    })
+      .then(() => fetch(`http://localhost:5001/incident/${incidentId}/comments`))
+      .then((response) => response.json())
+      .then((data) => {
+        setComments(data);
+        // Restore scroll position after state update
+        setTimeout(() => window.scrollTo(0, currentScrollPosition), 0);
+      })
+      .catch((error) => console.error("Error reacting to comment:", error));
+  };
 
   if (loading) return <p>Loading incident details...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -65,90 +183,129 @@ const IncidentPage = () => {
   return (
     <div className="incident-page">
       <ResponsiveAppBar />
+      
+      <div className="content-container" ref={mainContentRef}>
+        <div className="title-container">
+          <h1>{incident.title}</h1>
+          <h3 className="location">Location: {incident.location}</h3>
+          <p className="description">{incident.description}</p>
 
-      <div className="title-container">
-        <h1>{incident.title}</h1>
-        <h3 className="location">Location: {incident.location}</h3>
-
-        <p className="description">{incident.description}</p>
-
-        {/* Incident Image */}
-        {incident.image_path && (
-          <img
-            src={`http://localhost:5001/${incident.image_path}`}
-            alt={incident.title}
-            width="500"
-            className="mx-auto my-4 block"
-          />
-        )}
-
-        {/* Resolved/Active Buttons */}
-        <div className="button-container">
-          <button
-            className="active-button"
-            onClick={() => submitVote("active")}
-          >
-            Active
-          </button>
-          <button
-            className="resolved-button"
-            onClick={() => submitVote("resolved")}
-          >
-            Resolved
-          </button>
-        </div>
-        {/*the history of all the votes*/}
-        <div className="vote-history">
-          <p>Recent Votes:</p>
-          <div className="vote-line">
-            {votes.map((vote, index) => (
-              <div
-                key={index}
-                className={`vote-marker ${vote.status}`}
-                title={`Voted ${vote.status} at ${new Date(vote.voted_at).toLocaleTimeString()}`}
+          {incident.image_path && (
+            <div className="image-container">
+              <img
+                src={`http://localhost:5001/${incident.image_path}`}
+                alt={incident.title}
+                width="500"
+                className="incident-image"
+                onLoad={() => window.scrollTo(0, scrollPositionRef.current)}
               />
-            ))}
+            </div>
+          )}
+
+          <div className="button-container">
+            <button className="active-button" onClick={() => submitVote("active")}>
+              Active
+            </button>
+            <button className="resolved-button" onClick={() => submitVote("resolved")}>
+              Resolved
+            </button>
+          </div>
+
+          <div className="vote-history">
+            <p>Recent Votes:</p>
+            <div className="vote-line">
+              {votes.map((vote, index) => (
+                <div
+                  key={index}
+                  className={`vote-marker ${vote.status}`}
+                  title={`Voted ${vote.status} at ${new Date(vote.voted_at).toLocaleTimeString()}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
-        {/* Comment Section */}
-        <div className="comment-section">
-          <p>Roar Board</p>
 
-          {/* Comment Input */}
-          <div className="comment-container">
+        <div className="comment-section" ref={commentSectionRef}>
+          <h3 className="comment-header-title">Roar Board</h3>
+
+          {currentUser ? (
             <div className="comment-input">
-              <textarea
-                type="text"
-                placeholder="Type a thought..."
-                value={commentData.commentText}
-                onChange={(e) =>
-                  setCommentData({ ...commentData, commentText: e.target.value })
-                }
-              />
-              <button
-                onClick={() => {
-                  if (commentData.commentText.trim() === "") return;
-
-                  setCommentData({
-                    ...commentData,
-                    comments: [...commentData.comments, commentData.commentText],
-                    commentText: ""
-                  });
-                }}
-              >
-                Roar
-              </button>
+              <div className="comment-input-header">
+                {currentUser && (
+                  <img src={`https://i.pravatar.cc/40?u=${currentUser.email}`} alt="User" className="comment-avatar" />
+                )}
+                <textarea
+                  placeholder="Type a thought..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                />
+              </div>
+              <button className="comment-button" onClick={() => postComment(commentText)}>Roar</button>
             </div>
+          ) : (
+            <p className="login-message">You must be logged in to comment</p>
+          )}
 
-            {/* temporary comment section*/}
-            <ul className="all-comments">
-              {commentData.comments.map((comment, index) => (
-                <li key={index} className="comment">
-                  <textarea readOnly value={comment} className="comment-box" />
+          <ul className="all-comments">
+            {comments
+              .filter((comment) => !comment.parent_comment_id)
+              .map((comment) => (
+                <li key={comment.id} className="comment">
+                  <div className="comment-header">
+                    <img src={comment.user_profile} alt="User" className="comment-avatar" />
+                    <div className="comment-user-info">
+                      <span className="comment-username">{comment.user_name}</span>
+                      <span className="comment-time">{new Date(comment.created_at).toLocaleTimeString()}</span>
+                    </div>
+                  </div>
+                  <p className="comment-text">{comment.text}</p>
+                  <div className="comment-actions">
+                    <button className="action-button" onClick={() => reactToComment(comment.id, "like")}>
+                      <span className="action-icon">👍</span> <span className="action-count">{comment.likes}</span>
+                    </button>
+                    <button className="action-button" onClick={() => reactToComment(comment.id, "dislike")}>
+                      <span className="action-icon">👎</span> <span className="action-count">{comment.dislikes}</span>
+                    </button>
+                    <button className="reply-button" onClick={() => handleReply(comment.id)}>
+                      <span className="action-icon">↩️</span> Reply
+                    </button>
+                  </div>
+
+                  {replyingTo === comment.id && (
+                    <div className="reply-input">
+                      {currentUser && (
+                        <img src={`https://i.pravatar.cc/40?u=${currentUser.email}`} alt="User" className="comment-avatar" />
+                      )}
+                      <textarea
+                        placeholder="Write a reply..."
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        className="reply-textarea"
+                      />
+                      <div className="reply-actions">
+                        <button className="cancel-button" onClick={() => handleReply(null)}>Cancel</button>
+                        <button className="reply-submit-button" onClick={() => submitReply(comment.id)}>Reply</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {comments
+                    .filter((reply) => reply.parent_comment_id === comment.id)
+                    .map((reply) => (
+                      <div key={reply.id} className="comment reply">
+                        <div className="comment-header">
+                          <img src={reply.user_profile} alt="User" className="comment-avatar" />
+                          <div className="comment-user-info">
+                            <span className="comment-username">{reply.user_name}</span>
+                            <span className="comment-time">{new Date(reply.created_at).toLocaleTimeString()}</span>
+                          </div>
+                        </div>
+                        <p className="comment-text">{reply.text}</p>
+                      </div>
+                    ))}
                 </li>
               ))}
-            </ul>
-          </div>
+          </ul>
         </div>
       </div>
     </div>
