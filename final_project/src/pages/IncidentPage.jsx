@@ -14,6 +14,7 @@ const IncidentPage = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
+  const [userVote, setUserVote] = useState(null);
   const commentSectionRef = useRef(null);
   const mainContentRef = useRef(null);
   const scrollPositionRef = useRef(0);
@@ -52,11 +53,38 @@ const IncidentPage = () => {
       .catch((error) => console.error("Error fetching votes:", error));
 
     // Fetch comments
-    fetch(`http://localhost:5001/incident/${incidentId}/comments`)
+    fetchComments();
+    
+  }, [incidentId]);
+
+  // Fetch user's vote if logged in
+  useEffect(() => {
+    if (currentUser) {
+      fetch(`http://localhost:5001/incident/${incidentId}/user-vote?userEmail=${currentUser.email}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.hasVoted) {
+            setUserVote(data.vote);
+          }
+        })
+        .catch((error) => console.error("Error fetching user vote:", error));
+      
+      // Also refresh comments with user's reactions
+      fetchComments();
+    }
+  }, [currentUser, incidentId]);
+
+  // Function to fetch comments with user reactions if logged in
+  const fetchComments = () => {
+    const url = currentUser 
+      ? `http://localhost:5001/incident/${incidentId}/comments?userEmail=${currentUser.email}`
+      : `http://localhost:5001/incident/${incidentId}/comments`;
+      
+    fetch(url)
       .then((response) => response.json())
       .then((data) => setComments(data))
       .catch((error) => console.error("Error fetching comments:", error));
-  }, [incidentId]);
+  };
 
   // Save scroll position before any state update that might cause rerender
   useEffect(() => {
@@ -79,24 +107,48 @@ const IncidentPage = () => {
   }, [comments, votes, incident]);
 
   const submitVote = (status) => {
+    if (!currentUser) {
+      alert("You must be logged in to vote.");
+      return;
+    }
+
+    if (userVote) {
+      alert(`You have already voted ${userVote} on this incident.`);
+      return;
+    }
+    
     const currentScrollPosition = window.scrollY;
     
     fetch(`http://localhost:5001/incident/${incidentId}/vote`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ 
+        status,
+        userEmail: currentUser.email
+      }),
     })
-      .then((response) => response.json())
-      .then(() => {
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then(data => {
+            throw new Error(data.message || "Failed to submit vote");
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setUserVote(status);
         fetch(`http://localhost:5001/incident/${incidentId}/votes`)
           .then((response) => response.json())
-          .then((data) => {
-            setVotes(data);
+          .then((votesData) => {
+            setVotes(votesData);
             // Restore scroll position after state update
             setTimeout(() => window.scrollTo(0, currentScrollPosition), 0);
           });
       })
-      .catch((error) => console.error("Error submitting vote:", error));
+      .catch((error) => {
+        console.error("Error submitting vote:", error);
+        alert(error.message);
+      });
   };
 
   const postComment = (text, parentCommentId = null) => {
@@ -121,13 +173,11 @@ const IncidentPage = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newComment),
     })
-      .then(() => fetch(`http://localhost:5001/incident/${incidentId}/comments`))
-      .then((response) => response.json())
-      .then((data) => {
+      .then(() => fetchComments())
+      .then(() => {
         setCommentText("");
         setReplyText("");
         setReplyingTo(null);
-        setComments(data);
         
         // Restore scroll position after state update and DOM changes
         setTimeout(() => window.scrollTo(0, currentScrollPosition), 0);
@@ -158,31 +208,45 @@ const IncidentPage = () => {
   };
 
   const reactToComment = (commentId, type) => {
+    if (!currentUser) {
+      alert("You must be logged in to react to comments.");
+      return;
+    }
+    
     // Save scroll position
     const currentScrollPosition = window.scrollY;
     
-    // Reference to the clicked heart for animation
-    const heartButton = document.getElementById(`heart-${commentId}`);
+    // Reference to the clicked button for animation
+    const button = document.getElementById(`${type}-${commentId}`);
     
-    if (type === "like" && heartButton) {
-      // Add animation class
-      heartButton.classList.add('heart-animation');
-      
-      // Remove the class after animation completes
-      setTimeout(() => {
-        heartButton.classList.remove('heart-animation');
-      }, 1000);
+    if (button) {
+      // Add animation class based on reaction type
+      if (type === "like") {
+        button.classList.add('heart-animation');
+        setTimeout(() => {
+          button.classList.remove('heart-animation');
+        }, 1000);
+      } else if (type === "dislike") {
+        button.classList.add('dislike-animation');
+        setTimeout(() => {
+          button.classList.remove('dislike-animation');
+        }, 500);
+      }
     }
     
     fetch(`http://localhost:5001/comment/${commentId}/react`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type }),
+      body: JSON.stringify({ 
+        type,
+        userEmail: currentUser.email
+      }),
     })
-      .then(() => fetch(`http://localhost:5001/incident/${incidentId}/comments`))
       .then((response) => response.json())
-      .then((data) => {
-        setComments(data);
+      .then(() => {
+        // Refresh comments to get updated reactions
+        fetchComments();
+        
         // Restore scroll position after state update
         setTimeout(() => window.scrollTo(0, currentScrollPosition), 0);
       })
@@ -216,11 +280,21 @@ const IncidentPage = () => {
           )}
 
           <div className="button-container">
-            <button className="active-button" onClick={() => submitVote("active")}>
+            <button 
+              className={`active-button ${userVote === 'active' ? 'voted' : ''}`} 
+              onClick={() => submitVote("active")}
+              disabled={userVote !== null}
+            >
               Active
+              {userVote === 'active' && <span className="voted-indicator">✓</span>}
             </button>
-            <button className="resolved-button" onClick={() => submitVote("resolved")}>
+            <button 
+              className={`resolved-button ${userVote === 'resolved' ? 'voted' : ''}`} 
+              onClick={() => submitVote("resolved")}
+              disabled={userVote !== null}
+            >
               Resolved
+              {userVote === 'resolved' && <span className="voted-indicator">✓</span>}
             </button>
           </div>
 
@@ -278,12 +352,24 @@ const IncidentPage = () => {
                       onClick={() => reactToComment(comment.id, "like")}
                     >
                       <span 
-                        id={`heart-${comment.id}`} 
-                        className={`heart-icon ${comment.likes > 0 ? 'heart-filled' : ''}`}
+                        id={`like-${comment.id}`} 
+                        className={`heart-icon ${comment.user_reaction === 'like' ? 'heart-filled' : ''}`}
                       >
-                        {comment.likes > 0 ? '❤️' : '🤍'}
+                        {comment.user_reaction === 'like' ? '❤️' : '🤍'}
                       </span>
                       <span className="action-count">{comment.likes}</span>
+                    </button>
+                    <button 
+                      className="dislike-button" 
+                      onClick={() => reactToComment(comment.id, "dislike")}
+                    >
+                      <span 
+                        id={`dislike-${comment.id}`} 
+                        className={`dislike-icon ${comment.user_reaction === 'dislike' ? 'dislike-filled' : ''}`}
+                      >
+                        {comment.user_reaction === 'dislike' ? '👎' : '👎🏼'}
+                      </span>
+                      <span className="action-count">{comment.dislikes}</span>
                     </button>
                     <button className="reply-button" onClick={() => handleReply(comment.id)}>
                       <span className="action-icon">↩️</span> Reply
@@ -326,12 +412,24 @@ const IncidentPage = () => {
                             onClick={() => reactToComment(reply.id, "like")}
                           >
                             <span 
-                              id={`heart-${reply.id}`} 
-                              className={`heart-icon ${reply.likes > 0 ? 'heart-filled' : ''}`}
+                              id={`like-${reply.id}`} 
+                              className={`heart-icon ${reply.user_reaction === 'like' ? 'heart-filled' : ''}`}
                             >
-                              {reply.likes > 0 ? '❤️' : '🤍'}
+                              {reply.user_reaction === 'like' ? '❤️' : '🤍'}
                             </span>
                             <span className="action-count">{reply.likes}</span>
+                          </button>
+                          <button 
+                            className="dislike-button" 
+                            onClick={() => reactToComment(reply.id, "dislike")}
+                          >
+                            <span 
+                              id={`dislike-${reply.id}`} 
+                              className={`dislike-icon ${reply.user_reaction === 'dislike' ? 'dislike-filled' : ''}`}
+                            >
+                              {reply.user_reaction === 'dislike' ? '👎' : '👎🏼'}
+                            </span>
+                            <span className="action-count">{reply.dislikes}</span>
                           </button>
                         </div>
                       </div>
