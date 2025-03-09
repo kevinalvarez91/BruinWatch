@@ -161,6 +161,19 @@ const IncidentPage = () => {
     // Save scroll position
     const currentScrollPosition = window.scrollY;
     
+    // Reference to the clicked heart for animation
+    const heartButton = document.getElementById(`heart-${commentId}`);
+    
+    if (type === "like" && heartButton) {
+      // Add animation class
+      heartButton.classList.add('heart-animation');
+      
+      // Remove the class after animation completes
+      setTimeout(() => {
+        heartButton.classList.remove('heart-animation');
+      }, 1000);
+    }
+    
     fetch(`http://localhost:5001/comment/${commentId}/react`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -260,11 +273,17 @@ const IncidentPage = () => {
                   </div>
                   <p className="comment-text">{comment.text}</p>
                   <div className="comment-actions">
-                    <button className="action-button" onClick={() => reactToComment(comment.id, "like")}>
-                      <span className="action-icon">👍</span> <span className="action-count">{comment.likes}</span>
-                    </button>
-                    <button className="action-button" onClick={() => reactToComment(comment.id, "dislike")}>
-                      <span className="action-icon">👎</span> <span className="action-count">{comment.dislikes}</span>
+                    <button 
+                      className="heart-button" 
+                      onClick={() => reactToComment(comment.id, "like")}
+                    >
+                      <span 
+                        id={`heart-${comment.id}`} 
+                        className={`heart-icon ${comment.likes > 0 ? 'heart-filled' : ''}`}
+                      >
+                        {comment.likes > 0 ? '❤️' : '🤍'}
+                      </span>
+                      <span className="action-count">{comment.likes}</span>
                     </button>
                     <button className="reply-button" onClick={() => handleReply(comment.id)}>
                       <span className="action-icon">↩️</span> Reply
@@ -301,6 +320,20 @@ const IncidentPage = () => {
                           </div>
                         </div>
                         <p className="comment-text">{reply.text}</p>
+                        <div className="comment-actions">
+                          <button 
+                            className="heart-button" 
+                            onClick={() => reactToComment(reply.id, "like")}
+                          >
+                            <span 
+                              id={`heart-${reply.id}`} 
+                              className={`heart-icon ${reply.likes > 0 ? 'heart-filled' : ''}`}
+                            >
+                              {reply.likes > 0 ? '❤️' : '🤍'}
+                            </span>
+                            <span className="action-count">{reply.likes}</span>
+                          </button>
+                        </div>
                       </div>
                     ))}
                 </li>
