@@ -71,7 +71,25 @@ incidentDb.run(`CREATE TABLE IF NOT EXISTS comments (
   parent_comment_id INTEGER DEFAULT NULL, -- Allows replies
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )`);
+//to keep track of each users reaction to comments 
+incidentDb.run(`CREATE TABLE IF NOT EXISTS comment_reactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  comment_id INTEGER NOT NULL,
+  user_email TEXT NOT NULL,
+  reaction_type TEXT CHECK(reaction_type IN ('like', 'dislike')) NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(comment_id, user_email)
+)`);
 
+//to keep track of users votes on incident status's
+incidentDb.run(`CREATE TABLE IF NOT EXISTS user_votes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  incident_id INTEGER NOT NULL,
+  user_email TEXT NOT NULL,
+  status TEXT CHECK(status IN ('active', 'resolved')) NOT NULL,
+  voted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(incident_id, user_email)
+)`);
 // Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
@@ -88,17 +106,33 @@ app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 //fetch comments for an incident 
 app.get('/incident/:id/comments',(req,res)=>{
-  const{id} = req.params;
-  const sql =`SELECT * FROM comments WHERE incident_id = ? ORDER BY created_at DESC`;
-
-  incidentDb.all(sql,[id],(err,rows) => {
-    if(err){
-      console.error("Database error:",err);
-      return res.status(500).json({message: "Error retrieving comments" });
+  const { id } = req.params;
+  const { userEmail } = req.query; // Optional user email for personalized results
+  
+  let sql;
+  let params;
+  
+  if (userEmail) {
+    // Include the user's reactions to each comment
+    sql = `SELECT c.*, 
+           (SELECT reaction_type FROM comment_reactions 
+            WHERE comment_id = c.id AND user_email = ?) AS user_reaction
+           FROM comments c 
+           WHERE c.incident_id = ? 
+           ORDER BY c.created_at DESC`;
+    params = [userEmail, id];
+  } else {
+    // Simple query without user reactions
+    sql = `SELECT * FROM comments WHERE incident_id = ? ORDER BY created_at DESC`;
+    params = [id];
+  }
+  incidentDb.all(sql, params, (err, rows) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Error retrieving comments" });
     }
     res.json(rows);
-  });
-
+});
 });
 //action for posting a new comment 
 app.post('/incident/:id/comment', (req, res) => {
@@ -109,7 +143,7 @@ app.post('/incident/:id/comment', (req, res) => {
   console.log("🛠️ Received comment data:", req.body);
 
   if (!user_email || !user_name || !text) {
-    console.error("❌ Missing required fields:", { user_email, user_name, text });
+    console.error("Missing required fields:", { user_email, user_name, text });
     return res.status(400).json({ message: "Missing required fields." });
   }
 
@@ -118,46 +152,304 @@ app.post('/incident/:id/comment', (req, res) => {
 
   incidentDb.run(sql, [id, user_email, user_name, user_profile, text, parent_comment_id || null], function (err) {
     if (err) {
-      console.error("❌ Database error:", err);
+      console.error("Database error:", err);
       return res.status(500).json({ message: "Failed to post comment" });
     }
-    res.json({ message: "✅ Comment added", commentId: this.lastID });
+    res.json({ message: "Comment added", commentId: this.lastID });
   });
 });
-//now to like and dislike comments 
+//now to like and dislike comments and doing one OR the other 
 app.post('/comment/:commentId/react', (req, res) => {
   const { commentId } = req.params;
-  const { type } = req.body; // "like" or "dislike"
-
-  let column = type === "like" ? "likes" : "dislikes";
-  const sql = `UPDATE comments SET ${column} = ${column} + 1 WHERE id = ?`;
-
-  incidentDb.run(sql, [commentId], function (err) {
-    if (err) {
-      console.error("Database error:", err);
-      return res.status(500).json({ message: "Failed to update reaction" });
+  const { type,userEmail } = req.body; // "like" or "dislike"
+  //checking for user email 
+  if(!userEmail){
+    return res.status(400).json({message: "User email is required"});
+  }
+  //checking to see if it a valid reaction
+  if(!["like","dislike"].includes(type)){
+    return res.status(400).json({message: "Invalid reaction type"});
+  }
+  //now we want to check to see if the user has already like or disliked this comment
+  const checkSql = `SELECT reaction_type FROM comment_reactions
+                    WHERE comment_id = ? AND user_email = ?`;
+  incidentDb.get(checkSql, [commentId,userEmail],(err,existingReaction)=>{
+    if(err){
+      console.error("Database error:",err);
+      return res.status(500).json({message:"failed to check existing reaction"});
     }
-    res.json({ message: `${type} added` });
+    //handling reaction with respect to what already exists 
+    if (!existingReaction) {
+      //no existing reaction so add a new one
+      handleNewReaction(commentId, userEmail, type, res);
+    } else if (existingReaction.reaction_type === type) {
+      //same reaction type so we remove it
+      handleRemoveReaction(commentId, userEmail, type, res);
+    } else {
+      //different reaction type so we toggle them and vice versa 
+      handleSwitchReaction(commentId, userEmail, type, res);
+    }
   });
 });
+//now all the helper functions needed 
+//handle new reaction
+function handleNewReaction(commentId, userEmail, type, res) {
+  //beginning the transaction
+  incidentDb.run('BEGIN TRANSACTION', function(err) {
+    if (err) {
+      console.error("Transaction begin error:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    
+    //adding the reaction to comment_reactions
+    const insertSql = `INSERT INTO comment_reactions (comment_id, user_email, reaction_type, created_at)
+                      VALUES (?, ?, ?, CURRENT_TIMESTAMP)`;
+    
+    incidentDb.run(insertSql, [commentId, userEmail, type], function(err) {
+      if (err) {
+        incidentDb.run('ROLLBACK');
+        console.error("Insert reaction error:", err);
+        return res.status(500).json({ message: "Failed to add reaction" });
+      }
+      
+      //Updating the comment counts by one 
+      const column = type === "like" ? "likes" : "dislikes";
+      const updateSql = `UPDATE comments SET ${column} = ${column} + 1 WHERE id = ?`;
+      
+      incidentDb.run(updateSql, [commentId], function(err) {
+        if (err) {
+          incidentDb.run('ROLLBACK');
+          console.error("Update counts error:", err);
+          return res.status(500).json({ message: "Failed to update counts" });
+        }
+        
+        //commiting the transaction
+        incidentDb.run('COMMIT', function(err) {
+          if (err) {
+            incidentDb.run('ROLLBACK');
+            console.error("Commit error:", err);
+            return res.status(500).json({ message: "Database error" });
+          }
+          
+          res.json({ 
+            message: `${type} added`, 
+            action: 'added',
+            type: type
+          });
+        });
+      });
+    });
+  });
+}
+//helper function to remove an exisiting comment reaction
+function handleRemoveReaction(commentId, userEmail, type, res) {
+  //beginning the transaction
+  incidentDb.run('BEGIN TRANSACTION', function(err) {
+    if (err) {
+      console.error("Transaction begin error:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    
+    // deleting the reactio from comments 
+    const deleteSql = `DELETE FROM comment_reactions 
+                     WHERE comment_id = ? AND user_email = ?`;
+    
+    incidentDb.run(deleteSql, [commentId, userEmail], function(err) {
+      if (err) {
+        incidentDb.run('ROLLBACK');
+        console.error("Delete reaction error:", err);
+        return res.status(500).json({ message: "Failed to remove reaction" });
+      }
+      
+      // 2.Updating the comment count 
+      const column = type === "like" ? "likes" : "dislikes";
+      const updateSql = `UPDATE comments SET ${column} = ${column} - 1 WHERE id = ?`;
+      //erroro checking
+      incidentDb.run(updateSql, [commentId], function(err) {
+        if (err) {
+          incidentDb.run('ROLLBACK');
+          console.error("Update counts error:", err);
+          return res.status(500).json({ message: "Failed to update counts" });
+        }
+        
+        //now we commiti the transaction
+        incidentDb.run('COMMIT', function(err) {
+          if (err) {
+            incidentDb.run('ROLLBACK');
+            console.error("Commit error:", err);
+            return res.status(500).json({ message: "Database error" });
+          }
+          
+          res.json({ 
+            message: `${type} removed`, 
+            action: 'removed',
+            type: type
+          });
+        });
+      });
+    });
+  });
+}
+//helper functon to switch between reactions 
+function handleSwitchReaction(commentId, userEmail, newType, res) {
+  const oldType = newType === 'like' ? 'dislike' : 'like';
+  
+  //beginning the transaction
+  incidentDb.run('BEGIN TRANSACTION', function(err) {
+    if (err) {
+      console.error("Transaction begin error:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    
+    //updating the reaction type in comment_reactions 
+    const updateReactionSql = `UPDATE comment_reactions 
+                             SET reaction_type = ?, created_at = CURRENT_TIMESTAMP
+                             WHERE comment_id = ? AND user_email = ?`;
+    
+    incidentDb.run(updateReactionSql, [newType, commentId, userEmail], function(err) {
+      if (err) {
+        incidentDb.run('ROLLBACK');
+        console.error("Update reaction error:", err);
+        return res.status(500).json({ message: "Failed to update reaction" });
+      }
+      
+      // updating the comment count, incrementing the new one and decrementing the old one
+      const updateCountsSql = `UPDATE comments 
+                             SET ${oldType}s = ${oldType}s - 1,
+                                 ${newType}s = ${newType}s + 1
+                             WHERE id = ?`;
+      
+      incidentDb.run(updateCountsSql, [commentId], function(err) {
+        if (err) {
+          incidentDb.run('ROLLBACK');
+          console.error("Update counts error:", err);
+          return res.status(500).json({ message: "Failed to update counts" });
+        }
+        
+        //commiting the transaction
+        incidentDb.run('COMMIT', function(err) {
+          if (err) {
+            incidentDb.run('ROLLBACK');
+            console.error("Commit error:", err);
+            return res.status(500).json({ message: "Database error" });
+          }
+          
+          res.json({ 
+            message: `Switched from ${oldType} to ${newType}`, 
+            action: 'switched',
+            type: newType,
+            oldType: oldType
+          });
+        });
+      });
+    });
+  });
+}
+
 //end of comment section 
 //app.use and get API for the resolved feature 
 //this is to keep track of the user votes
+//chnaged this to only allow the user one vote per incident 
 app.post('/incident/:id/vote', (req, res) => {
   const { id } = req.params;
-  const { status } = req.body; // "active" or "resolved"
+  const { status, userEmail } = req.body; //grabs active or resolved the user_email
+  
+  if (!userEmail) {
+    return res.status(400).json({ message: "User email is required" });
+  }
 
   if (!["active", "resolved"].includes(status)) {
     return res.status(400).json({ message: "Invalid status" });
   }
 
-  const sql = `INSERT INTO votes (incident_id, status, voted_at) VALUES (?, ?, CURRENT_TIMESTAMP)`;
-  incidentDb.run(sql, [id, status], function (err) {
+  //then we check if user ha already voted on this incident 
+  const checkSql = `SELECT id, status FROM user_votes 
+                  WHERE incident_id = ? AND user_email = ?`;
+  
+  incidentDb.get(checkSql, [id, userEmail], (err, existingVote) => {
     if (err) {
       console.error("Database error:", err);
-      return res.status(500).json({ message: "Database insertion failed" });
+      return res.status(500).json({ message: "Failed to check existing votes" });
     }
-    res.json({ message: "Vote recorded", voteId: this.lastID });
+    
+    if (existingVote) {
+      // if they already voted then me output a message
+      return res.status(400).json({ 
+        message: "You have already voted on this incident", 
+        currentVote: existingVote.status 
+      });
+    }
+    
+    //then we begin the transaction 
+    incidentDb.run('BEGIN TRANSACTION', function(err) {
+      if (err) {
+        console.error("Transaction begin error:", err);
+        return res.status(500).json({ message: "Database error" });
+      }
+      
+      //we record the users vote
+      const insertUserVoteSql = `INSERT INTO user_votes (incident_id, user_email, status, voted_at) 
+                               VALUES (?, ?, ?, CURRENT_TIMESTAMP)`;
+      
+      incidentDb.run(insertUserVoteSql, [id, userEmail, status], function(err) {
+        if (err) {
+          incidentDb.run('ROLLBACK');
+          console.error("Insert user vote error:", err);
+          return res.status(500).json({ message: "Failed to record user vote" });
+        }
+        
+        //record them in the table 
+        const insertVoteSql = `INSERT INTO votes (incident_id, status, voted_at) 
+                             VALUES (?, ?, CURRENT_TIMESTAMP)`;
+        //inserting them in 
+        incidentDb.run(insertVoteSql, [id, status], function(err) {
+          if (err) {
+            incidentDb.run('ROLLBACK');
+            console.error("Insert vote error:", err);
+            return res.status(500).json({ message: "Failed to record vote" });
+          }
+          
+          //commit the transaction 
+          incidentDb.run('COMMIT', function(err) {
+            if (err) {
+              incidentDb.run('ROLLBACK');
+              console.error("Commit error:", err);
+              return res.status(500).json({ message: "Database error" });
+            }
+            
+            res.json({ 
+              message: "Vote recorded successfully", 
+              voteId: this.lastID,
+              status: status 
+            });
+          });
+        });
+      });
+    });
+  });
+});
+//adding an enpoint to check the user's vote on an incident 
+app.get('/incident/:id/user-vote', (req, res) => {
+  const { id } = req.params;
+  const { userEmail } = req.query;
+  
+  if (!userEmail) {
+    return res.status(400).json({ message: "User email is required" });
+  }
+  
+  const sql = `SELECT status FROM user_votes 
+              WHERE incident_id = ? AND user_email = ?`;
+  
+  incidentDb.get(sql, [id, userEmail], (err, vote) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Error retrieving user vote" });
+    }
+    
+    res.json({ 
+      hasVoted: !!vote,
+      vote: vote ? vote.status : null
+    });
   });
 });
 //fetching the last 5 votes to display them 
