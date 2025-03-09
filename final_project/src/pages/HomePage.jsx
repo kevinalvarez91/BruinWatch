@@ -43,7 +43,10 @@ function Preview({ title, description, location, lat, lng, image_path, created_a
       <p><strong>Location: </strong>{location}</p>
       {/* <p><strong>Coordinates: </strong>{lat}, {lng}</p> */}
       {distance !== undefined && distance !== Infinity && (
-        <p><strong>Distance: </strong>{distance.toFixed(2)} km</p>
+        <p>
+        <strong>Distance: </strong>
+        {distance.toFixed(2)} km ({(distance * 0.621371).toFixed(2)} miles)
+      </p>
       )}
       <p><strong>Reported at: </strong>{new Date(created_at).toLocaleString()}</p>
       <p className="reported-time">{timeSince(created_at)}</p>
