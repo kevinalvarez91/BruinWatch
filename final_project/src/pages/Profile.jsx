@@ -5,7 +5,7 @@ import ResponsiveAppBar from "../components/Toolbar";
 const Profile = () => {
   const [user, setUser] = useState({
     name: "",
-    profilePic: "NULL",
+    profilePic: "NULL", // Default to "NULL" or an empty string
     about: "About me placeholder",
     contact: {
       email: "",
@@ -43,10 +43,12 @@ const Profile = () => {
       <ResponsiveAppBar />
       <div className="profile-header">
         <img 
-          src={user.profilePic} 
+          src={user.profilePic === "NULL" ? "/src/assets/ucla.jpg" : user.profilePic} // Use default image if profilePic is "NULL"
           alt={`${user.name} Profile`} 
           className="profile-picture"
-          onError={(e) => { e.target.src = 'path_to_default_image.png'; }} // Add a default image in case of error
+          onError={(e) => { 
+            e.target.src = '/images/ucla.jpg'; // Fallback to default image if the image fails to load
+          }} 
         />
         <div className="profile-basic">
           <h1>{user.name}</h1>
