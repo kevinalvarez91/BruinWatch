@@ -20,7 +20,19 @@ const Dashboard = () => {
   const [stats, setStats] = useState({ totalIncidents: 0, activeReports: 0, resolvedIssues: 0 });
   const [reports, setReports] = useState([]);
 
+  // Set chart global defaults
   useEffect(() => {
+    // Set global chart defaults
+    ChartJS.defaults.font.family = "'Roboto', 'Segoe UI', sans-serif";
+    ChartJS.defaults.color = '#555';
+    ChartJS.defaults.font.size = 12;
+    ChartJS.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    ChartJS.defaults.plugins.tooltip.padding = 10;
+    ChartJS.defaults.plugins.tooltip.cornerRadius = 6;
+    ChartJS.defaults.plugins.tooltip.titleFont = { weight: 'bold', size: 14 };
+
+    
+    // Fetch data
     fetch('http://localhost:5001/stats', { credentials: 'include' })
       .then(response => response.json())
       .then(data => setStats(data))
@@ -38,15 +50,36 @@ const Dashboard = () => {
     return acc;
   }, {});
   const sortedDates = Object.keys(incidentsByDate).sort();
+  
+  // Enhanced line chart data with gradient
   const lineChartData = {
     labels: sortedDates,
     datasets: [
       {
         label: 'Incidents Over Time',
         data: sortedDates.map(date => incidentsByDate[date]),
-        fill: false,
-        borderWidth: 2,
-        tension: 0.1
+        fill: true,
+        backgroundColor: function(context) {
+          const chart = context.chart;
+          const {ctx, chartArea} = chart;
+          if (!chartArea) {
+            return null;
+          }
+          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+          gradient.addColorStop(0, 'rgba(54, 162, 235, 0.1)');
+          gradient.addColorStop(1, 'rgba(54, 162, 235, 0.4)');
+          return gradient;
+        },
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 3,
+        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+        pointBorderColor: '#fff',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(54, 162, 235, 1)',
+        pointHoverBorderWidth: 2,
+        tension: 0.3
       }
     ]
   };
@@ -60,18 +93,25 @@ const Dashboard = () => {
   // Get all unique location labels
   const locationLabels = Object.keys(incidentsByLocation);
 
-  // Generate unique colors using HSL
-  const generateUniqueColors = (numColors) => {
+  // Generate enhanced colors using HSL with better saturation and lightness
+  const generateEnhancedColors = (numColors) => {
     const colors = [];
+    const backgroundColors = [];
+    const borderColors = [];
+    
     for (let i = 0; i < numColors; i++) {
       const hue = Math.round((360 / numColors) * i);
-      // Use fixed saturation and lightness for consistency.
-      colors.push(`hsl(${hue}, 70%, 50%)`);
+      const bgColor = `hsla(${hue}, 80%, 65%, 0.8)`;
+      const borderColor = `hsla(${hue}, 90%, 45%, 1)`;
+      
+      backgroundColors.push(bgColor);
+      borderColors.push(borderColor);
     }
-    return colors;
+    
+    return { backgroundColors, borderColors };
   };
 
-  const pieColors = generateUniqueColors(locationLabels.length);
+  const { backgroundColors, borderColors } = generateEnhancedColors(locationLabels.length);
 
   const pieChartData = {
     labels: locationLabels,
@@ -79,46 +119,137 @@ const Dashboard = () => {
       {
         label: 'Incidents by Location',
         data: Object.values(incidentsByLocation),
-        backgroundColor: pieColors,
-        borderColor: pieColors,
-        borderWidth: 1,
+        backgroundColor: backgroundColors,
+        borderColor: borderColors,
+        borderWidth: 2,
+        hoverOffset: 15
       }
     ]
   };
 
-  // Chart.js options for the line chart
+  // Enhanced Chart.js options for the line chart
   const lineChartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Allow the chart to resize based on the container
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
+        labels: {
+          boxWidth: 15,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 20,
+          font: {
+            size: 14,
+            weight: 'bold'
+          }
+        }
       },
       title: {
         display: true,
         text: 'Incidents Over Time',
+        font: {
+          size: 18,
+          weight: 'bold'
+        },
+        padding: {
+          bottom: 20
+        }
       },
+      tooltip: {
+        usePointStyle: true,
+        callbacks: {
+          title: function(context) {
+            return `Date: ${context[0].label}`;
+          },
+          label: function(context) {
+            return `Incidents: ${context.raw}`;
+          }
+        }
+      }
     },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+          drawBorder: false
+        },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45,
+          padding: 10,
+          font: {
+            size: 11
+          }
+        }
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(200, 200, 200, 0.2)'
+        },
+        ticks: {
+          precision: 0,
+          font: {
+            size: 12
+          }
+        }
+      }
+    },
+    elements: {
+      line: {
+        tension: 0.4
+      }
+    },
+    layout: {
+      padding: 10
+    }
   };
 
-  // Chart.js options for the pie chart
+  // Enhanced Chart.js options for the pie chart
   const pieChartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Allow the chart to resize based on the container
+    maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'right', // Move the legend to the right
+        position: 'right',
+        align: 'center',
         labels: {
+          padding: 15,
+          usePointStyle: true,
+          pointStyle: 'rectRounded',
+          boxWidth: 10,
+          boxHeight: 10,
           font: {
-            size: 14, // Increase font size for better readability
-          },
-        },
+            size: 12
+          }
+        }
       },
       title: {
         display: true,
         text: 'Incidents by Location',
+        font: {
+          size: 18,
+          weight: 'bold'
+        },
+        padding: {
+          bottom: 20
+        }
       },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const value = context.raw;
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = Math.round((value / total) * 100);
+            return `${context.label}: ${value} (${percentage}%)`;
+          }
+        }
+      }
     },
+    layout: {
+      padding: 20
+    }
   };
 
   return (
@@ -150,7 +281,10 @@ const Dashboard = () => {
             {sortedDates.length > 0 ? (
               <Line data={lineChartData} options={lineChartOptions} />
             ) : (
-              <p>No data available for line chart.</p>
+              <div className="no-data">
+                <i className="far fa-chart-bar"></i>
+                <p>No data available for line chart.</p>
+              </div>
             )}
           </div>
         </div>
@@ -160,7 +294,10 @@ const Dashboard = () => {
             {locationLabels.length > 0 ? (
               <Pie data={pieChartData} options={pieChartOptions} />
             ) : (
-              <p>No data available for pie chart.</p>
+              <div className="no-data">
+                <i className="far fa-chart-pie"></i>
+                <p>No data available for pie chart.</p>
+              </div>
             )}
           </div>
         </div>
