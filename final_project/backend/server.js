@@ -23,11 +23,12 @@ const multer = require('multer');
 const app = express();
 const PORT = 5001;
 
-const users = [];
+// const users = [];
+
 initializePassport(
   passport, 
-  email => users.find(user => user.email === email),
-  id => users.find(user => user.id === id)
+  getUserByEmail,
+  getUserByID
 );
 
 const incidentDb = new sqlite3.Database('incidentReports.db', (err) => {
@@ -102,6 +103,7 @@ const upload = multer({ storage: storage });
 
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+
 //fetch comments for an incident 
 app.get('/incident/:id/comments',(req,res)=>{
   const { id } = req.params;
@@ -464,6 +466,54 @@ app.get('/incident/:id/votes', (req, res) => {
   });
 });
 
+// Payton's database
+// ==================================================================
+const loginDb = new sqlite3.Database('loginSystem.db', (err) => {
+  if (err) {
+    console.error("Could not open loginSystem.db", err);
+  } else {
+    console.log("Connected to the loginSystem database.");
+  }
+});
+
+// create users table with desired fields
+loginDb.run(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    age INTEGER,
+    association TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    phone TEXT,
+    password TEXT NOT NULL
+  )
+`, (err) => {
+  if (err) {
+    console.error("Error creating users table:", err);
+  } else {
+    console.log("Users table is ready.");
+  }
+});
+
+// Define functions to get a user by email and by ID using the loginDb
+function getUserByEmail(email) {
+  return new Promise((resolve, reject) => {
+    loginDb.get("SELECT * FROM users WHERE email = ?", [email], (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+}
+
+function getUserByID(id) {
+  return new Promise((resolve, reject) => {
+    loginDb.get("SELECT * FROM users WHERE id = ?", [id], (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+}
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -493,14 +543,41 @@ app.post("/login", (req, res, next) => {
 });
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
-  const { email, password } = req.body;
-  if (users.find((user) => user.email === email)) {
-    return res.status(400).json({ message: "Email already exists" });
-  }
-  const hashedPassword = await bcrypt.hash(password, 10);
-  users.push({ id: users.length + 1, email, password: hashedPassword });
-  res.json({ message: "User registered successfully!" });
-  console.log(users);
+  const { name, age, association, email, phone, password } = req.body;
+
+  // Check if a user with the given email already exists
+  loginDb.get("SELECT * FROM users WHERE email = ?", [email], async (err, row) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    if (row) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    try {
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      // Insert new user into the database
+      loginDb.run(
+        "INSERT INTO users (name, age, association, email, phone, password) VALUES (?, ?, ?, ?, ?, ?)",
+        [name, age, association, email, phone, hashedPassword],
+        function(err) {
+          if (err) {
+            console.error("Registration error:", err);
+            return res.status(500).json({ message: "User registration failed" });
+          }
+
+          // log the new user ID
+          console.log("New user registered with ID: ${this.lastID}");
+          res.json({ message: "User registered successfully!", userId: this.lastID });
+        }
+      );
+    } catch (e) {
+      console.error("Hashing error:", e);
+      res.status(500).json({ message: "Error processing registration" });
+    }
+  });
 });
 
 // POST route to handle incident report submission (including coordinates)
