@@ -34,6 +34,9 @@ cd bruinwatch
 # Install dependencies
 npm install
 
+# Make sure to install the following
+npm install react-chartjs-2 chart.js
+
 # Start the development server
 npm run dev
 
@@ -41,8 +44,11 @@ npm run dev
 cd backend
 node server.js
 
-#Note you must create a .env file
+# Note you must create a .env file
 touch .env
+
+# This should be the contents of the .env file
+SESSION_SECERT = secert
 ```
 
 ## Contributing
