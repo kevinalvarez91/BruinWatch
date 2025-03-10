@@ -43,10 +43,25 @@ function Preview({ title, description, location, lat, lng, image_path, created_a
         <img 
           src={`http://localhost:5001/${image_path}`} 
           alt={title} 
-          style={{ marginTop: "10px", maxWidth: "100%", height: "auto" }}
+          style={{ 
+            marginTop: "10px", 
+            maxWidth: "100%", 
+            height: "auto", 
+            display: "block", 
+            marginLeft: "auto", 
+            marginRight: "auto" 
+          }}
         />
       )}
-      <p>{description}</p>
+      <p style={{
+        display: "-webkit-box",
+        WebkitBoxOrient: "vertical",
+        WebkitLineClamp: 2,
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+        }}>
+          {description}
+      </p>
       <p><strong>Location: </strong>{location}</p>
 
       {distance !== undefined && distance !== Infinity && (
@@ -56,7 +71,18 @@ function Preview({ title, description, location, lat, lng, image_path, created_a
         </p>
       )}
       <p><strong>Reported at: </strong>{new Date(created_at).toLocaleString()}</p>
-      <p className="reported-time">{timeSince(created_at)}</p>
+
+      <p style={{ 
+        textAlign: "right", 
+        display: "block", 
+        marginRight: "0" 
+      }}>
+        {timeSince(created_at)}
+      </p>
+      {/* <Link to={`/incident/${id}`} className="p-2 bg-blue-500 text-white rounded">
+        Details
+      </Link> */}
+
     </div>
   );
 }
