@@ -492,6 +492,15 @@ loginDb.run(`
     console.error("Error creating users table:", err);
   } else {
     console.log("Users table is ready.");
+
+    // Query and print all records from the users table
+    loginDb.all("SELECT * FROM users", [], (err, rows) => {
+      if (err) {
+        console.error("Error retrieving users:", err);
+      } else {
+        console.log("Current users in login database:", rows);
+      }
+    });
   }
 });
 
@@ -545,6 +554,16 @@ app.post("/login", (req, res, next) => {
 app.post('/register', checkNotAuthenticated, async (req, res) => {
   const { name, age, association, email, phone, password } = req.body;
 
+    // 1. Log the incoming data (hide the raw password for security)
+    console.log("\nNew registered user info:", {
+      name,
+      age,
+      association,
+      phone,
+      email,
+      password: "Classified" // Don't log the real password
+    });
+
   // Check if a user with the given email already exists
   loginDb.get("SELECT * FROM users WHERE email = ?", [email], async (err, row) => {
     if (err) {
@@ -558,6 +577,7 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
       // Hash the password
       const hashedPassword = await bcrypt.hash(password, 10);
+
       // Insert new user into the database
       loginDb.run(
         "INSERT INTO users (name, age, association, email, phone, password) VALUES (?, ?, ?, ?, ?, ?)",
@@ -567,9 +587,6 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
             console.error("Registration error:", err);
             return res.status(500).json({ message: "User registration failed" });
           }
-
-          // log the new user ID
-          console.log("New user registered with ID: ${this.lastID}");
           res.json({ message: "User registered successfully!", userId: this.lastID });
         }
       );
