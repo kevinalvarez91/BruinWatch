@@ -1,117 +1,290 @@
-/* General Styles */
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: #f4f4f9;
-  color: #333;
-  margin: 0;
-  padding: 0;
+/* Profile.css */
+
+.profile-page {
+  min-height: 100vh;
+  background-color: #f7f9fc;
 }
 
 .profile-container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  margin-top: 20px;
 }
 
-.profile-header {
+/* Loading and Error States */
+.loading-state,
+.error-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 20px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #4f46e5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
   margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-state p {
+  margin-bottom: 20px;
+  color: #e53e3e;
+  font-size: 1.2rem;
+}
+
+.error-state button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.error-state button:hover {
+  background-color: #4338ca;
+}
+
+/* Profile Header */
+.profile-header-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+.profile-cover-image {
+  height: 180px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  position: relative;
+}
+
+.profile-header-content {
+  display: flex;
+  padding: 0 30px 30px;
+  position: relative;
 }
 
 .profile-picture {
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  margin-right: 20px;
+  border: 5px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   object-fit: cover;
-  border: 3px solid #007bff;
+  margin-top: -75px;
+  background-color: white;
 }
 
-.profile-basic h1 {
-  margin: 0;
-  font-size: 2em;
-  color: #007bff;
+.profile-basic-info {
+  margin-left: 30px;
+  padding-top: 30px;
 }
 
-.profile-basic .age, .profile-basic .education {
-  margin: 5px 0;
-  font-size: 1.1em;
-  color: #666;
+.profile-basic-info h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 15px;
 }
 
-.profile-about, .profile-contact, .profile-interests, .profile-trust-rating {
-  margin-bottom: 20px;
+.profile-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
 }
 
-.profile-about h2, .profile-contact h2, .profile-interests h2, .profile-trust-rating h2 {
-  font-size: 1.5em;
-  color: #007bff;
-  border-bottom: 2px solid #007bff;
-  padding-bottom: 5px;
-  margin-bottom: 10px;
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
 }
 
-.profile-about p, .profile-contact p {
-  font-size: 1.1em;
+.age-badge {
+  background-color: #ebf8ff;
+  color: #3182ce;
+}
+
+.education-badge {
+  background-color: #e6fffa;
+  color: #319795;
+}
+
+.trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trust-label {
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.star {
+  font-size: 1.2rem;
+  color: #cbd5e0;
+}
+
+.star.filled {
+  color: #f6ad55;
+}
+
+.rating-number {
+  margin-left: 5px;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+/* Profile Content Layout */
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+@media (min-width: 768px) {
+  .profile-content {
+    flex-direction: row;
+  }
+  
+  .profile-main {
+    flex: 2;
+  }
+  
+  .profile-sidebar {
+    flex: 1;
+  }
+}
+
+/* Section Styling */
+.profile-section {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.profile-section h2 {
+  font-size: 1.3rem;
+  color: #2d3748;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section-content {
+  color: #4a5568;
   line-height: 1.6;
 }
 
-.profile-contact a {
-  color: #007bff;
+/* Interests Section */
+.interests-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.interest-tag {
+  background-color: #f7f9fc;
+  color: #4f46e5;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Contact Section */
+.contact-item {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.contact-icon {
+  font-size: 1.2rem;
+  margin-right: 16px;
+  color: #4f46e5;
+}
+
+.contact-details h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 4px;
+}
+
+.contact-details a {
+  color: #4f46e5;
   text-decoration: none;
 }
 
-.profile-contact a:hover {
+.contact-details a:hover {
   text-decoration: underline;
 }
 
-.profile-interests ul {
-  list-style-type: none;
-  padding: 0;
+.no-info {
+  color: #a0aec0;
+  font-style: italic;
 }
 
-.profile-interests li {
-  background-color: #007bff;
-  color: #fff;
-  padding: 10px;
-  margin: 5px 0;
-  border-radius: 5px;
-  display: inline-block;
-  margin-right: 10px;
+/* Action Buttons */
+.actions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.profile-trust-rating .rating {
-  font-size: 1.2em;
-  color: #007bff;
-  font-weight: bold;
+.action-button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .profile-header {
-    flex-direction: column;
-    text-align: center;
-  }
+.primary-button {
+  background-color: #4f46e5;
+  color: white;
+}
 
-  .profile-picture {
-    margin-right: 0;
-    margin-bottom: 15px;
-  }
+.primary-button:hover {
+  background-color: #4338ca;
+}
 
-  .profile-basic h1 {
-    font-size: 1.8em;
-  }
+.secondary-button {
+  background-color: white;
+  color: #4f46e5;
+  border: 1px solid #4f46e5;
+}
 
-  .profile-basic .age, .profile-basic .education {
-    font-size: 1em;
-  }
-
-  .profile-about p, .profile-contact p {
-    font-size: 1em;
-  }
+.secondary-button:hover {
+  background-color: #f7f9fc;
 }
