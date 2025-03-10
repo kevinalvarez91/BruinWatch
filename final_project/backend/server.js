@@ -526,7 +526,12 @@ function getUserByID(id) {
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false, 
+  cookie: {
+    secure: false,
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 
 app.use(passport.initialize());
@@ -688,6 +693,7 @@ app.get('/stats', (req, res) => {
 });
 
 
+
 app.post("/logout", (req, res) => {
   req.logout((err) => {
     if (err) return res.status(500).json({ message: "Logout failed" });
@@ -727,6 +733,37 @@ function checkAuthenticated(req, res, next) {
   }
   res.status(401).json({ message: "Unauthorized - Please log in " });
 }
+
+//This is for profile
+app.get('/api/user', checkAuthenticated, (req, res) => {
+  console.log("User object: ", req.user);
+  const userEmail = req.user.email; // Assuming the user's email is stored in req.user
+
+  loginDb.get("SELECT name, age, email, phone FROM users WHERE email = ?", [userEmail], (err, row) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Error retrieving user data" });
+    }
+    if (!row) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Return the user data
+    res.json({
+      name: row.name,
+      profilePic: "NULL", // Placeholder for profile picture
+      about: "About me placeholder", // Placeholder for "About Me"
+      contact: {
+        email: row.email,
+        phone: row.phone || "No phone number provided"
+      },
+      interests: ["Drawing", "Coding"], // Placeholder for interests
+      age: row.age || 0,
+      education: "Undergraduate", // Placeholder for education
+      trustRating: 4.5 // Placeholder for trust rating
+    });
+  });
+});
 
 function checkNotAuthenticated(req, res, next) {
   if(req.isAuthenticated()) {
