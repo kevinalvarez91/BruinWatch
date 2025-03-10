@@ -95,6 +95,7 @@ export default function HomePage() {
   const [highlightedIncidentId, setHighlightedIncidentId] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [sortBy, setSortBy] = useState("time");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -165,7 +166,7 @@ export default function HomePage() {
       }
       return { ...preview, distance: Infinity };
     })
-    .filter(preview => preview.distance !== undefined && preview.distance !== null)
+    .filter(preview => filterStatus === "all" || (filterStatus === "resolved" ? preview.isResolved : !preview.isResolved))
     .sort((a, b) => {
       if (sortBy === "location") {
         return a.distance - b.distance;
@@ -203,7 +204,14 @@ export default function HomePage() {
             <option value="location">Nearest</option>
             <option value="time">Most Recent</option>
           </select>
+          <label>Filter by: </label>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <option value="all">All</option>
+            <option value="resolved">Resolved</option>
+            <option value="active">Active</option>
+          </select>
         </div>
+        
         <div className="preview_list">
           {filteredPreviews.map((preview) => (
             <Preview 
