@@ -5,7 +5,9 @@ import '../css/Contant.css';
 const Contact = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: Implement backend submission logic later.
+    alert("Sent!");
+    // Reset the form fields
+    e.target.reset();
   };
 
   return (
@@ -71,5 +73,3 @@ const Contact = () => {
 };
 
 export default Contact;
-
-  
