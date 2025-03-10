@@ -1,6 +1,6 @@
 import { useState } from "react";
 import MyMap from "../components/Map";
-import "../css/index.css";
+import "../css/Report.css"; // Import our new CSS file
 import ResponsiveAppBar from "../components/Toolbar";
 import { useNavigate } from "react-router-dom";
 
@@ -10,6 +10,7 @@ const Report = () => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleImageChange = (e) => {
@@ -23,7 +24,24 @@ const Report = () => {
     }
   };
 
-  const handleSubmit = async () => {    
+  const handleSubmit = async () => {
+    if (!title.trim()) {
+      alert("Please enter an incident title");
+      return;
+    }
+    
+    if (!description.trim()) {
+      alert("Please provide a description of the incident");
+      return;
+    }
+    
+    if (!coordinates) {
+      alert("Please mark a location on the map");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
     console.log("Coordinates before sending:", coordinates);
       
     const formData = new FormData();
@@ -43,10 +61,12 @@ const Report = () => {
         formData.append("location", locationName);
       } else {
         alert("Please select a valid location on the map");
+        setIsSubmitting(false);
         return;
       }
     } else {
       alert("Please mark a location on the map");
+      setIsSubmitting(false);
       return;
     }
       
@@ -60,13 +80,14 @@ const Report = () => {
         body: formData,
       });
   
-      // **Fix: Ensure we parse JSON response properly**
+      // Ensure we parse JSON response properly
       let data;
       try {
         data = await res.json();
       } catch (jsonError) {
         console.error("Failed to parse JSON response:", jsonError);
         alert("Unexpected server response. Please try again.");
+        setIsSubmitting(false);
         return;
       }
   
@@ -88,16 +109,19 @@ const Report = () => {
       } else {
         console.error("Server reported an error:", data);
         alert(`Failed to report incident: ${data.message || "Unknown error"}`);
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Error reporting incident:", error);
       alert("A network error occurred. Please try again.");
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div>
+    <div className="report-container">
       <ResponsiveAppBar />
+      
       {/* Full-screen map */}
       <div className="map-container">
         <MyMap onLocationSelect={(locationData) => {
@@ -106,7 +130,7 @@ const Report = () => {
         }} />
       </div>
 
-      {/* Overlay for the form (on the left side) */}
+      {/* Overlay for the form */}
       <div className="overlay">
         {/* Page Title */}
         <h1>Incident Report</h1>
@@ -114,10 +138,10 @@ const Report = () => {
         {/* Form Container */}
         <div className="flex-col">
           {/* Title Input */}
-          <div className="flex-col">
-            <label className="text-gray-700 font-semibold">Incident Title</label>
-            <label className="text-gray-700 font-semibold">Mark a location via a pin</label>
+          <div className="input-group">
+            <label htmlFor="incident-title">Incident Title</label>
             <input
+              id="incident-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -125,34 +149,63 @@ const Report = () => {
             />
           </div>
 
+          {/* Location instruction */}
+          <div className="input-group">
+            <label>Location</label>
+            <p className="location-marker-label">Click on the map to mark the incident location</p>
+            
+            {coordinates && (
+              <div className="location-indicator">
+                <span className="location-indicator-icon">📍</span>
+                <span className="location-indicator-text">
+                  {coordinates.location || "Selected location"}
+                </span>
+              </div>
+            )}
+          </div>
+
           {/* Description Textarea */}
-          <div className="flex-col">
-            <label className="text-gray-700 font-semibold">Description</label>
+          <div className="input-group">
+            <label htmlFor="incident-description">Description</label>
             <textarea
+              id="incident-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the incident..."
+              placeholder="Describe the incident in detail..."
               rows="4"
               className="textarea-custom"
             />
           </div>
 
           {/* Image Input */}
-          <div className="flex-col">
-            <label className="text-gray-700 font-semibold">Upload Image</label>
-            <input type="file" accept="image/*" onChange={handleImageChange} />
-            {preview && (
-              <img
-                src={preview}
-                alt="Image Preview"
-                style={{ marginTop: "10px", maxWidth: "100%", height: "auto" }}
+          <div className="input-group file-upload">
+            <label>Upload Image</label>
+            <div className="file-input-container">
+              <input 
+                type="file" 
+                id="image-upload" 
+                accept="image/*" 
+                onChange={handleImageChange} 
               />
+            </div>
+            
+            {preview && (
+              <div className="image-preview">
+                <img
+                  src={preview}
+                  alt="Image Preview"
+                />
+              </div>
             )}
           </div>
 
           {/* Report Button */}
-          <button onClick={handleSubmit} className="btn-primary">
-            Report Incident
+          <button 
+            onClick={handleSubmit} 
+            className={`btn-primary ${isSubmitting ? 'loading' : ''}`}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Report Incident'}
           </button>
         </div>
       </div>
