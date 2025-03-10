@@ -189,10 +189,12 @@ export default function HomePage() {
     <div>
       <ResponsiveAppBar />
       <div className="map-container">
-        <HomepageMap 
-          incidents={previews} 
-          highlightedIncidentId={highlightedIncidentId}
-        />
+      <HomepageMap 
+      incidents={filteredPreviews} 
+      highlightedIncidentId={highlightedIncidentId}
+      filterStatus={filterStatus}
+      userLocation={userLocation} // ✅ Ensure this is passed
+      />
       </div>
       <div className="preview_overlay flex flex-col space-y-8">
         <h1>Latest Near You</h1>
@@ -211,15 +213,15 @@ export default function HomePage() {
             <option value="active">Active</option>
           </select>
         </div>
-        
+
         <div className="preview_list">
-          {filteredPreviews.map((preview) => (
-            <Preview 
-              key={preview.id}
-              {...preview}  
-              onHover={handleHover}
-            />
-          ))}
+        {filteredPreviews.map((preview) => (
+          <Preview 
+            key={preview.id || `${preview.lat}-${preview.lng}`} 
+            {...preview}  
+            onHover={handleHover} 
+          />
+        ))}
         </div>
       </div>
     </div>

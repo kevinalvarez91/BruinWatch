@@ -2,14 +2,19 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef } from 'react';
 
-function HomepageMap({ incidents, highlightedIncidentId }) {
+function HomepageMap({ incidents, highlightedIncidentId, filterStatus, userLocation }) {
+  const filteredIncidents = incidents.filter(incident => 
+    filterStatus === "all" || (filterStatus === "resolved" ? incident.isResolved : !incident.isResolved)
+  );
+  console.log("user location", userLocation);
+
   return (
     <MapContainer 
       center={[34.0689, -118.4452]} 
       zoom={15} 
       style={{ height: "100%", width: "100%" }}
     >
-    <MapContent incidents={incidents} highlightedIncidentId={highlightedIncidentId} />
+      <MapContent incidents={filteredIncidents} highlightedIncidentId={highlightedIncidentId} />
     </MapContainer>
   );
 }
@@ -29,10 +34,9 @@ function MapContent({ incidents, highlightedIncidentId }) {
         }
       }
     } else {
-      // Ensure markersRef.current exists before calling closePopup()
       if (markersRef.current) {
         Object.values(markersRef.current).forEach(marker => {
-          if (marker) marker.closePopup(); // ✅ Ensure the marker is valid before calling closePopup()
+          if (marker) marker.closePopup();
         });
       }
     }
@@ -47,17 +51,17 @@ function MapContent({ incidents, highlightedIncidentId }) {
         attribution='&copy; Google'
       />
 
-      {incidents.map((incident) => (
-        <Marker
-          key={incident.id} // ✅ Ensure each marker has a unique key
-          position={[incident.lat, incident.lng]}
-          ref={(el) => markersRef.current[incident.id] = el}
-        >
-          <Popup>
-            <b>{incident.title}</b>
-          </Popup>
-        </Marker>
-      ))}
+    {incidents.map((incident) => (
+      <Marker
+      key={incident.id || `${incident.lat}-${incident.lng}`} 
+      position={[incident.lat, incident.lng]}
+      ref={(el) => markersRef.current[incident.id] = el}
+      >
+        <Popup>
+          <b>{incident.title}</b>
+        </Popup>
+      </Marker>
+    ))}
     </>
   );
 }
