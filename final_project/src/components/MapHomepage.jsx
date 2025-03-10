@@ -2,11 +2,10 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef } from 'react';
 
-function HomepageMap({ incidents, highlightedIncidentId, filterStatus, userLocation }) {
+function HomepageMap({ incidents, highlightedIncidentId, filterStatus}) {
   const filteredIncidents = incidents.filter(incident => 
     filterStatus === "all" || (filterStatus === "resolved" ? incident.isResolved : !incident.isResolved)
   );
-  console.log("user location", userLocation);
 
   return (
     <MapContainer 

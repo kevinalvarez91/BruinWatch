@@ -94,8 +94,8 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [highlightedIncidentId, setHighlightedIncidentId] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
-  const [sortBy, setSortBy] = useState("time");
-  const [filterStatus, setFilterStatus] = useState("all");
+  const [sortBy, setSortBy] = useState(() => localStorage.getItem("sortBy") || "time");
+  const [filterStatus, setFilterStatus] = useState(() => localStorage.getItem("filterStatus") || "all");
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -202,12 +202,25 @@ export default function HomePage() {
         <Search onSearch={setSearchTerm} />
         <div>
           <label>Sort by: </label>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              const newSortBy = e.target.value;
+              setSortBy(newSortBy);
+              localStorage.setItem("sortBy", newSortBy);
+          }}>
             <option value="location">Nearest</option>
             <option value="time">Most Recent</option>
           </select>
-          <label>Filter by: </label>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+
+          <label style={{ marginLeft: "16px" }}>Filter by: </label>
+          <select
+            value={filterStatus}
+            onChange={(e) => {
+              const newFilterStatus = e.target.value;
+              setFilterStatus(newFilterStatus);
+              localStorage.setItem("filterStatus", newFilterStatus);
+          }}>
             <option value="all">All</option>
             <option value="resolved">Resolved</option>
             <option value="active">Active</option>
