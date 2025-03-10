@@ -1,0 +1,32 @@
+/* Status Badge - Positioned in the top-right corner */
+.incident-status {
+    position: absolute;
+    top: 5px;
+    left: 0px;
+    padding: 5px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+    color: white;
+    z-index: 10;
+    
+  }
+  
+  /* Active (Red) Status */
+  .incident-active {
+    background-color: #e74c3c;
+  }
+  
+  /* Resolved (Blue) Status */
+  .incident-resolved {
+    background-color: #3498db;
+  }
+  
+  /* Ensure the parent card has relative positioning */
+  .preview_widget {
+    position: relative;
+    padding: 15px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease-in-out;
+  }
+  
