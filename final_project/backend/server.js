@@ -559,8 +559,12 @@ app.post("/login", (req, res, next) => {
 app.post('/register', checkNotAuthenticated, async (req, res) => {
   const { name, age, association, email, phone, password } = req.body;
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?ucla\.edu$/
+  const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+  if (!phoneRegex.test(phone)) {
+    return res.status(400).json({ message: "Invalid phone number" });
+  }
 
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?ucla\.edu$/
   // Validate the email using the regex
   if (!emailRegex.test(email)) {
     return res.status(400).json({ message: "Email must be a UCLA email ending in .ucla.edu or ucla.edu" });
