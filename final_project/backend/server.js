@@ -703,8 +703,6 @@ app.get('/stats', (req, res) => {
   });
 });
 
-
-
 app.post("/logout", (req, res) => {
   req.logout((err) => {
     if (err) return res.status(500).json({ message: "Logout failed" });
@@ -718,6 +716,14 @@ app.post("/logout", (req, res) => {
 
 app.get("/home", checkAuthenticated, (req, res) => {
   res.json({ user: req.user });
+});
+
+app.get("/auth-status", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ authenticated: true, user: req.user });
+  } else {
+    res.status(401).json({ authenticated: false });
+  }
 });
 
 // GET route to fetch a single incident by ID
