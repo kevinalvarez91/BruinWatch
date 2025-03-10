@@ -2,7 +2,6 @@ import React from 'react';
 import '../css/Account.css';
 import ResponsiveAppBar from "../components/Toolbar";
 
-
 const Account = () => {
   return (
     <div className="account-container">
@@ -26,8 +25,8 @@ const Account = () => {
         </div>
         <div className="info-group">
           <label htmlFor="aboutMe">About me:</label>
-          <input type="aboutMe" id="aboutMe" placeholder="I am a software engineer." />
-          </div>
+          <textarea id="aboutMe" placeholder="I am a software engineer." rows="4"></textarea>
+        </div>
       </section>
 
       {/* Login & Security Settings Section */}
