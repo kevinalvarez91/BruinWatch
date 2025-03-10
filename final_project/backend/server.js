@@ -13,9 +13,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const initializePassport = require('./passport-config');
-const flash = require('express-flash');
 const session = require('express-session');
-const methodOverride = require('method-override');
 const cors = require("cors");
 
 // Additional requires for SQLite and file uploads
@@ -474,7 +472,6 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-// app.use(methodOverride('_method'));
 
 app.get('/', checkAuthenticated, (req, res) => {
   res.json({ message: "Welcome to BruinWatch!" });
@@ -580,6 +577,7 @@ app.post("/logout", (req, res) => {
 app.get("/home", checkAuthenticated, (req, res) => {
   res.json({ user: req.user });
 });
+
 // GET route to fetch a single incident by ID
 app.get('/reports/:id', (req, res) => {
   const { id } = req.params;
