@@ -3,7 +3,7 @@ import HomepageMap from "../components/MapHomepage";
 import { useState, useEffect } from "react";
 import ResponsiveAppBar from "../components/Toolbar";
 import Search from "../components/Search";
-import "../css/IncidentStatus.css"; 
+import "../css/IncidentStatusEnhanced.css"; 
 
 function timeSince(date) {
   const seconds = Math.floor((new Date() - new Date(date)) / 1000);
