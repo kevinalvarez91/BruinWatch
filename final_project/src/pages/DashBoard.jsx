@@ -56,12 +56,31 @@ const Dashboard = () => {
     acc[location] = (acc[location] || 0) + 1;
     return acc;
   }, {});
+
+  // Get all unique location labels
+  const locationLabels = Object.keys(incidentsByLocation);
+
+  // Generate unique colors using HSL
+  const generateUniqueColors = (numColors) => {
+    const colors = [];
+    for (let i = 0; i < numColors; i++) {
+      const hue = Math.round((360 / numColors) * i);
+      // Use fixed saturation and lightness for consistency.
+      colors.push(`hsl(${hue}, 70%, 50%)`);
+    }
+    return colors;
+  };
+
+  const pieColors = generateUniqueColors(locationLabels.length);
+
   const pieChartData = {
-    labels: Object.keys(incidentsByLocation),
+    labels: locationLabels,
     datasets: [
       {
         label: 'Incidents by Location',
         data: Object.values(incidentsByLocation),
+        backgroundColor: pieColors,
+        borderColor: pieColors,
         borderWidth: 1,
       }
     ]
@@ -138,7 +157,7 @@ const Dashboard = () => {
         <div className="graph-card">
           <h3>Incidents by Location</h3>
           <div className="graph-placeholder">
-            {Object.keys(incidentsByLocation).length > 0 ? (
+            {locationLabels.length > 0 ? (
               <Pie data={pieChartData} options={pieChartOptions} />
             ) : (
               <p>No data available for pie chart.</p>
