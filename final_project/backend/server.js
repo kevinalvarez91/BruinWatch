@@ -657,6 +657,37 @@ app.get('/reports', (req, res) => {
   });
 });
 
+// New GET endpoint to fetch statistics with adjusted KPI logic
+app.get('/stats', (req, res) => {
+  // First, get total incidents from the incidents table.
+  console.log("GET /stats endpoint hit"); // For debugging
+  incidentDb.get("SELECT COUNT(*) AS totalIncidents FROM incidents", [], (err, totalRow) => {
+    if (err) {
+      console.error("Error fetching total incidents:", err);
+      return res.status(500).json({ message: "Error retrieving total incidents" });
+    }
+    const totalIncidents = totalRow.totalIncidents;
+
+    // Next, count the number of incidents that have at least one "resolved" vote.
+    incidentDb.get(
+      "SELECT COUNT(DISTINCT incident_id) AS resolvedIssues FROM user_votes WHERE status = 'resolved'",
+      [],
+      (err, resolvedRow) => {
+        if (err) {
+          console.error("Error fetching resolved issues:", err);
+          return res.status(500).json({ message: "Error retrieving resolved issues" });
+        }
+        const resolvedIssues = resolvedRow.resolvedIssues;
+        // Consider any incident not resolved as active.
+        const activeReports = totalIncidents - resolvedIssues;
+
+        res.json({ totalIncidents, activeReports, resolvedIssues });
+      }
+    );
+  });
+});
+
+
 app.post("/logout", (req, res) => {
   req.logout((err) => {
     if (err) return res.status(500).json({ message: "Logout failed" });

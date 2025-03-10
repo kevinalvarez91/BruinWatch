@@ -34,6 +34,9 @@ cd bruinwatch
 # Install dependencies
 npm install
 
+# Make sure to install the following
+npm install react-chartjs-2 chart.js
+
 # Start the development server(FrontEdge)
 npm run dev
 
@@ -43,6 +46,9 @@ node server.js
 
 #Note you must create a .env file
 touch .env
+
+# This is the contents of the .env file
+SESSION_SECERT = secert 
 
 
 ```
