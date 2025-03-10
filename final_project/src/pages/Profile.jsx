@@ -1,27 +1,46 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../css/Profile.css';
 import ResponsiveAppBar from "../components/Toolbar";
 
-
 const Profile = () => {
-  // Example user data
-  const user = {
-    name: "John Doe",
-    profilePic: "https://via.placeholder.com/150",
-    about: "I am a passionate software developer who loves building innovative web applications and exploring new technologies.",
+  const [user, setUser] = useState({
+    name: "",
+    profilePic: "NULL",
+    about: "About me placeholder",
     contact: {
-      email: "john.doe@example.com",
-      phone: "+1 (555) 123-4567"
+      email: "",
+      phone: ""
     },
-    interests: ["Coding", "Traveling", "Photography", "Gaming"],
-    age: 25,
+    interests: ["Drawing ", "Coding"],
+    age: 0,
     education: "Undergraduate", // or "Graduate"
-    trustRating: 4.5 // Trust rating out of 5
-  };
+    trustRating: 0 // Trust rating out of 5
+  });
+
+  useEffect(() => {
+    // Fetch user data from the server
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/user', {
+          credentials: 'include' // Include cookies for session-based authentication
+        });
+        const text = await response.text();
+        if (response.ok) {
+          const userData = JSON.parse(text);
+          setUser(userData);
+        } else {
+          console.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   return (
     <div className="profile-container">
-    <ResponsiveAppBar />
+      <ResponsiveAppBar />
       <div className="profile-header">
         <img 
           src={user.profilePic} 
