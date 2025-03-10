@@ -559,15 +559,22 @@ app.post("/login", (req, res, next) => {
 app.post('/register', checkNotAuthenticated, async (req, res) => {
   const { name, age, association, email, phone, password } = req.body;
 
-    // 1. Log the incoming data (hide the raw password for security)
-    console.log("\nNew registered user info:", {
-      name,
-      age,
-      association,
-      phone,
-      email,
-      password: "Classified" // Don't log the real password
-    });
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?ucla\.edu$/;
+
+  // Validate the email using the regex
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: "Email must be a UCLA email ending in .ucla.edu or ucla.edu" });
+  }
+
+  // 1. Log the incoming data (hide the raw password for security)
+  console.log("\nNew registered user info:", {
+    name,
+    age,
+    association,
+    phone,
+    email,
+    password: "Classified" // Don't log the real password
+  });
 
   // Check if a user with the given email already exists
   loginDb.get("SELECT * FROM users WHERE email = ?", [email], async (err, row) => {
