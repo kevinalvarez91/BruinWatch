@@ -46,6 +46,7 @@ const Profile = () => {
           src={user.profilePic} 
           alt={`${user.name} Profile`} 
           className="profile-picture"
+          onError={(e) => { e.target.src = 'path_to_default_image.png'; }} // Add a default image in case of error
         />
         <div className="profile-basic">
           <h1>{user.name}</h1>
