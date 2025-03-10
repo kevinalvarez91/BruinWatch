@@ -202,13 +202,25 @@ export default function HomePage() {
         <Search onSearch={setSearchTerm} />
         <div>
           <label>Sort by: </label>
-          <select value={sortBy} onChange={(e) => {setFilterStatus(e.target.value); localStorage.setItem("sortBy", e.target.value);}}>
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              const newSortBy = e.target.value;
+              setSortBy(newSortBy);
+              localStorage.setItem("sortBy", newSortBy);
+          }}>
             <option value="location">Nearest</option>
             <option value="time">Most Recent</option>
           </select>
-          <label>Filter by: </label>
-          <select value={filterStatus} 
-                  onChange={(e) => {setFilterStatus(e.target.value); localStorage.setItem("filterStatus", e.target.value);}}>
+
+          <label style={{ marginLeft: "16px" }}>Filter by: </label>
+          <select
+            value={filterStatus}
+            onChange={(e) => {
+              const newFilterStatus = e.target.value;
+              setFilterStatus(newFilterStatus);
+              localStorage.setItem("filterStatus", newFilterStatus);
+          }}>
             <option value="all">All</option>
             <option value="resolved">Resolved</option>
             <option value="active">Active</option>
