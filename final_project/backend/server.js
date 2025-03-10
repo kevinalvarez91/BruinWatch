@@ -148,7 +148,7 @@ app.post('/incident/:id/comment', (req, res) => {
   }
 
   const sql = `INSERT INTO comments (incident_id, user_email, user_name, user_profile, text, parent_comment_id, created_at)
-               VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`;
+               VALUES (?, ?, ?, ?, ?, ?, datetime('now', 'localtime'))`;
 
   incidentDb.run(sql, [id, user_email, user_name, user_profile, text, parent_comment_id || null], function (err) {
     if (err) {

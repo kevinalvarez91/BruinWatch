@@ -367,7 +367,7 @@ const IncidentPage = () => {
                         id={`dislike-${comment.id}`} 
                         className={`dislike-icon ${comment.user_reaction === 'dislike' ? 'dislike-filled' : ''}`}
                       >
-                        {comment.user_reaction === 'dislike' ? '👎' : '👎🏼'}
+                        {comment.user_reaction === 'dislike' ? '😡' : '😠'}
                       </span>
                       <span className="action-count">{comment.dislikes}</span>
                     </button>
@@ -427,7 +427,7 @@ const IncidentPage = () => {
                               id={`dislike-${reply.id}`} 
                               className={`dislike-icon ${reply.user_reaction === 'dislike' ? 'dislike-filled' : ''}`}
                             >
-                              {reply.user_reaction === 'dislike' ? '👎' : '👎🏼'}
+                              {reply.user_reaction === 'dislike' ? '😡' : '😠'}
                             </span>
                             <span className="action-count">{reply.dislikes}</span>
                           </button>
