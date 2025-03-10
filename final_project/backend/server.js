@@ -559,7 +559,7 @@ app.post("/login", (req, res, next) => {
 app.post('/register', checkNotAuthenticated, async (req, res) => {
   const { name, age, association, email, phone, password } = req.body;
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?ucla\.edu$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?ucla\.edu$/
 
   // Validate the email using the regex
   if (!emailRegex.test(email)) {
