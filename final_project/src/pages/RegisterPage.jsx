@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
+import "../css/Register.css"
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
@@ -47,9 +47,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <div className="register-container">
       <h2>Register</h2>
-      <form onSubmit={handleRegister} style={{ display: "flex", flexDirection: "column", width: "300px" }}>
+      <form onSubmit={handleRegister} className="register-form">
         
         {/* Name Field */}
         <label>Name:</label>
@@ -109,14 +109,14 @@ export default function RegisterPage() {
           required
         />
 
-        <button type="submit" style={{ marginTop: "1rem" }}>
+        <button type="submit">
           Register
         </button>
       </form>
 
-      {message && <p style={{ color: "red", marginTop: "1rem" }}>{message}</p>}
+      {message &&<p className="message">{message}</p>}
 
-      <p style={{ marginTop: "1rem" }}>
+      <p className="link">
         Already have an account? <Link to="/login">Login here</Link>
       </p>
     </div>
