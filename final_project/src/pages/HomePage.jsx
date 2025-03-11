@@ -220,31 +220,35 @@ export default function HomePage() {
         <h1>Latest Near You</h1>
         
         <Search onSearch={setSearchTerm} />
-        <div>
-          <label>Sort by: </label>
-          <select
-            value={sortBy}
-            onChange={(e) => {
-              const newSortBy = e.target.value;
-              setSortBy(newSortBy);
-              localStorage.setItem("sortBy", newSortBy);
-          }}>
-            <option value="location">Nearest</option>
-            <option value="time">Most Recent</option>
-          </select>
+        <div className="filter-controls">
+          <div className="sort-control">
+            <label>Sort by: </label>
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                const newSortBy = e.target.value;
+                setSortBy(newSortBy);
+                localStorage.setItem("sortBy", newSortBy);
+            }}>
+              <option value="location">Nearest</option>
+              <option value="time">Most Recent</option>
+            </select>
+          </div>
 
-          <label style={{ marginLeft: "16px" }}>Filter by: </label>
-          <select
-            value={filterStatus}
-            onChange={(e) => {
-              const newFilterStatus = e.target.value;
-              setFilterStatus(newFilterStatus);
-              localStorage.setItem("filterStatus", newFilterStatus);
-          }}>
-            <option value="all">All</option>
-            <option value="resolved">Resolved</option>
-            <option value="active">Active</option>
-          </select>
+          <div className="filter-control">
+            <label>Filter by: </label>
+            <select
+              value={filterStatus}
+              onChange={(e) => {
+                const newFilterStatus = e.target.value;
+                setFilterStatus(newFilterStatus);
+                localStorage.setItem("filterStatus", newFilterStatus);
+            }}>
+              <option value="all">All</option>
+              <option value="resolved">Resolved</option>
+              <option value="active">Active</option>
+            </select>
+          </div>
         </div>
 
         <div className="preview_list">
