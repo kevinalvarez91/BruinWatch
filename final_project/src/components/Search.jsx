@@ -14,7 +14,7 @@ const Search = ({ onSearch }) => {
       value={query}
       onChange={handleChange}
       placeholder="Search incidents..."
-      className="border rounded-md w-full"
+      className="border rounded-md"
     />
   );
 };

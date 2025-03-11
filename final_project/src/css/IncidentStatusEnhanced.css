@@ -154,12 +154,13 @@
   
   /* Search box and controls */
   .search-container {
-    margin-bottom: 15px;
-    position: relative;
+    width: 90%; /* Ensures the search box does not exceed the container width */
+    box-sizing: border-box; /* Includes padding and border in the element's total width */
   }
+
   
   input[type="text"] {
-    width: 100%;
+    width: 90%;
     padding: 12px 40px 12px 15px;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
