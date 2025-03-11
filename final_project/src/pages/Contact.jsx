@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ResponsiveAppBar from "../components/Toolbar";
-import '../css/Contant.css';
+import '../css/Contact.css';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
