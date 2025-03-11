@@ -85,14 +85,6 @@ const Account = () => {
                 <span className="nav-icon">🔒</span>
                 Login & Security
               </button>
-              <button className="nav-item">
-                <span className="nav-icon">🔔</span>
-                Notifications
-              </button>
-              <button className="nav-item">
-                <span className="nav-icon">🔗</span>
-                Connected Accounts
-              </button>
             </nav>
           </div>
           
