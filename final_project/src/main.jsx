@@ -10,7 +10,7 @@ import IncidentPage from "./pages/IncidentPage.jsx";
 import Profile from "./pages/Profile.jsx";
 import DashBoard from "./pages/DashBoard.jsx";
 import Account from "./pages/Account.jsx";
-
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 import "./css/index.css"; // Ensure styles are applied
 
@@ -24,15 +24,15 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/home" element={<HomePage />} />
+        <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="*" element={<LoginPage />} /> { /* redirect unknown routes to login page */ }
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/report" element={<Report />} />
-        <Route path="/incident/:incidentId" element={<IncidentPage />} />
-        <Route path="/Profile" element={<Profile />} />
-        <Route path="/Dashboard" element={<DashBoard/>} />
-        <Route path="/Account" element={<Account />} />
+        <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+        <Route path="/report" element={<ProtectedRoute><Report /></ProtectedRoute>} />
+        <Route path="/incident/:incidentId" element={<ProtectedRoute><IncidentPage /></ProtectedRoute>} />
+        <Route path="/Profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/Dashboard" element={<ProtectedRoute><DashBoard /></ProtectedRoute>} />
+        <Route path="/Account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
       </Routes>
     </Router>
   );

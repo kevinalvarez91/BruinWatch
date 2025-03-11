@@ -88,7 +88,7 @@ function Preview({ title, description, location, lat, lng, image_path, created_a
 }
 
 export default function HomePage() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [previews, setPreviews] = useState([]);
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -97,25 +97,25 @@ export default function HomePage() {
   const [sortBy, setSortBy] = useState(() => localStorage.getItem("sortBy") || "time");
   const [filterStatus, setFilterStatus] = useState(() => localStorage.getItem("filterStatus") || "all");
 
-    // New: Check authentication status on mount
-    useEffect(() => {
-      fetch("http://localhost:5001/auth-status", {
-        credentials: "include",
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Not authenticated");
-          return res.json();
-        })
-        .then((data) => {
-          if (!data.authenticated) {
-            navigate("/login");
-          }
-        })
-        .catch((err) => {
-          console.error("Auth check failed:", err);
-          navigate("/login");
-        });
-    }, [navigate]);
+    // // New: Check authentication status on mount
+    // useEffect(() => {
+    //   fetch("http://localhost:5001/auth-status", {
+    //     credentials: "include",
+    //   })
+    //     .then((res) => {
+    //       if (!res.ok) throw new Error("Not authenticated");
+    //       return res.json();
+    //     })
+    //     .then((data) => {
+    //       if (!data.authenticated) {
+    //         navigate("/login");
+    //       }
+    //     })
+    //     .catch((err) => {
+    //       console.error("Auth check failed:", err);
+    //       navigate("/login");
+    //     });
+    // }, [navigate]);
     
   useEffect(() => {
     if (navigator.geolocation) {
