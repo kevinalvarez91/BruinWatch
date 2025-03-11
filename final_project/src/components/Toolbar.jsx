@@ -61,7 +61,7 @@ function ResponsiveAppBar() {
       <Container maxWidth="xl" disableGutters>
         <Toolbar disableGutters className='menuButton'>
           {/* Logo and Home link for larger screens */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mr: 2 }}>
+          <Box sx={{ml:1, display: { xs: 'none', md: 'flex' }, alignItems: 'center', mr: 2 }}>
             <img 
               src={bear_with_glasses}
               alt="Bear with Glasses"
@@ -167,7 +167,7 @@ function ResponsiveAppBar() {
           {/* User settings */}
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+              <IconButton onClick={handleOpenUserMenu} sx={{ mr: 1 }}>
                 <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
               </IconButton>
             </Tooltip>

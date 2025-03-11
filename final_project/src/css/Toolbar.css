@@ -9,3 +9,8 @@
     border: 2px solid white; /* Optional: adds a white border */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional: adds a subtle shadow */
 }
+
+.user-avatar-button {
+    padding: 0;
+    margin-right: 10px; /* Set 10px margin to the right */
+}
