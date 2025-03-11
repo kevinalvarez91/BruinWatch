@@ -169,11 +169,6 @@ const Profile = () => {
                 </div>
               </div>
             </section>
-            
-            <section className="profile-section actions-section">
-              <button className="action-button primary-button">Message</button>
-              <button className="action-button secondary-button">Share Profile</button>
-            </section>
           </div>
         </div>
       </div>
