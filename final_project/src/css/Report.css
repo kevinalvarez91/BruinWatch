@@ -21,6 +21,7 @@
   /* Form overlay */
   .overlay {
     position: absolute;
+    margin-top: 20px;
     top: 70px; /* Adjust based on your navbar height */
     left: 40px;
     width: 450px;
@@ -36,12 +37,13 @@
   
   /* Page title */
   .overlay h1 {
-    font-size: 2rem;
-    color: #2c3e50;
-    margin-bottom: 1.5rem;
-    font-weight: 700;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 15px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 10px;
   }
   
   /* Form layout */
