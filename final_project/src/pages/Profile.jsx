@@ -13,7 +13,7 @@ const Profile = () => {
     },
     interests: ["Drawing", "Coding"],
     age: 0,
-    education: "Undergraduate",
+    association: "",
     trustRating: 0
   });
   
@@ -102,7 +102,8 @@ const Profile = () => {
               <h1>{user.name || "Your Name"}</h1>
               <div className="profile-badges">
                 <span className="badge age-badge">{user.age || "N/A"} years old</span>
-                <span className="badge education-badge">{user.education || "N/A"} Student</span>
+                <span className="badge education-badge">{user.association || "N/A"} {(user.association === "Undergraduate"
+                  || user.association === "Graduate") ? " Student" : ""}</span>
                 <div className="trust-badge">
                   <span className="trust-label">Trust Rating:</span>
                   <div className="star-rating">

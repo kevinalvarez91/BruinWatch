@@ -756,7 +756,7 @@ app.get('/api/user', checkAuthenticated, (req, res) => {
   console.log("User object: ", req.user);
   const userEmail = req.user.email; // Assuming the user's email is stored in req.user
 
-  loginDb.get("SELECT name, age, email, phone FROM users WHERE email = ?", [userEmail], (err, row) => {
+  loginDb.get("SELECT name, age, association, email, phone FROM users WHERE email = ?", [userEmail], (err, row) => {
     if (err) {
       console.error("Database error:", err);
       return res.status(500).json({ message: "Error retrieving user data" });
@@ -776,7 +776,7 @@ app.get('/api/user', checkAuthenticated, (req, res) => {
       },
       interests: ["Drawing", "Coding"], // Placeholder for interests
       age: row.age || 0,
-      education: "Undergraduate", // Placeholder for education
+      association: row.association || "Fail",
       trustRating: 4.5 // Placeholder for trust rating
     });
   });

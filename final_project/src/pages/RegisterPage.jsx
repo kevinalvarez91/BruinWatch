@@ -77,9 +77,10 @@ export default function RegisterPage() {
           required
         >
           <option value="">--Select--</option>
-          <option value="undergrad">Undergraduate</option>
-          <option value="postgrad">Postgraduate</option>
-          <option value="faculty">Faculty</option>
+          <option value="Undergraduate">Undergraduate</option>
+          <option value="Graduate">Graduate</option>
+          <option value="Alumni">Alumni</option>
+          <option value="Faculty">Faculty</option>
         </select>
 
         {/* Phone Field */}
