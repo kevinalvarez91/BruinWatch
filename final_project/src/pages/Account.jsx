@@ -1,44 +1,90 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../css/Account.css';
 import ResponsiveAppBar from "../components/Toolbar";
 
 const Account = () => {
   const [personalInfo, setPersonalInfo] = useState({
-      name: "",
-      about: "",
-      contact: {
-        email: "",
-        phone: ""
-      },
-    });
+    name: "",
+    about: "",
+    contact: {
+      email: "",
+      phone: ""
+    },
+  });
     
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [deviceInfo, setDeviceInfo] = useState('');
   
-    useEffect(() => {
-      const fetchUserData = async () => {
-        setIsLoading(true);
-        try {
-          const response = await fetch('http://localhost:5001/api/user', {
-            credentials: 'include'
-          });
-          const text = await response.text();
-          if (response.ok) {
-            const userData = JSON.parse(text);
-            setPersonalInfo(userData);
-          } else {
-            setError("Failed to fetch user data");
-            console.error("Failed to fetch user data");
-          }
-        } catch (error) {
-          setError("Error connecting to server");
-          console.error("Error fetching user data:", error);
-        } finally {
-          setIsLoading(false);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('http://localhost:5001/api/user', {
+          credentials: 'include'
+        });
+        const text = await response.text();
+        if (response.ok) {
+          const userData = JSON.parse(text);
+          setPersonalInfo(userData);
+        } else {
+          setError("Failed to fetch user data");
+          console.error("Failed to fetch user data");
         }
-      };
-      fetchUserData();
-    }, []);
+      } catch (error) {
+        setError("Error connecting to server");
+        console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUserData();
+  }, []);
+  
+  // Device detection useEffect (from main branch)
+  useEffect(() => {
+    function detectBrowser() {
+      const userAgent = navigator.userAgent;
+      let browserName = "Unknown Browser";
+      if (userAgent.indexOf("Firefox") > -1) {
+        browserName = "Firefox";
+      } else if (userAgent.indexOf("OPR") > -1 || userAgent.indexOf("Opera") > -1) {
+        browserName = "Opera";
+      } else if (userAgent.indexOf("Trident") > -1) {
+        browserName = "Internet Explorer";
+      } else if (userAgent.indexOf("Edge") > -1) {
+        browserName = "Edge";
+      } else if (userAgent.indexOf("Chrome") > -1) {
+        browserName = "Chrome";
+      } else if (userAgent.indexOf("Safari") > -1) {
+        // Chrome's userAgent also includes "Safari", so Chrome is checked first.
+        browserName = "Safari";
+      }
+      return browserName;
+    }
+    
+    function detectOS() {
+      const platform = navigator.platform.toLowerCase();
+      const userAgent = navigator.userAgent.toLowerCase();
+      let os = "Unknown OS";
+      if (platform.indexOf("win") > -1) {
+        os = "Windows";
+      } else if (platform.indexOf("mac") > -1) {
+        os = "macOS";
+      } else if (platform.indexOf("linux") > -1) {
+        os = "Linux";
+      } else if (/android/.test(userAgent)) {
+        os = "Android";
+      } else if (/iphone|ipad|ipod/.test(userAgent)) {
+        os = "iOS";
+      }
+      return os;
+    }
+    
+    const browser = detectBrowser();
+    const os = detectOS();
+    setDeviceInfo(`${browser} on ${os}`);
+  }, []);
   
   const [securityInfo, setSecurityInfo] = useState({
     password: '',
@@ -341,7 +387,7 @@ const Account = () => {
                         <div className="device-info">
                           <span className="device-icon">💻</span>
                           <div>
-                            <div className="device-name">Chrome on macOS</div>
+                            <div className="device-name">{deviceInfo}</div>
                             <div className="session-details">Current session • Los Angeles, CA</div>
                           </div>
                         </div>
