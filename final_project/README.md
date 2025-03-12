@@ -29,27 +29,23 @@ For developers looking to run BruinWatch locally:
 ```sh
 # Clone the repository
 git clone https://github.com/kevinalvarez91/BruinWatch
-cd bruinwatch
+cd Bruinwatch
+cd final_project
 
-# Install dependencies
+# Install dependencies(for front end)
 npm install
-
-# Make sure to install the following
-npm install react-chartjs-2 chart.js
-
-# Start the development server(FrontEdge)
+# Start the development server(Front End)
 npm run dev
-
-# Start the backend
+# In seperate terminal
+# Backend (dependency install)
 cd backend
-node server.js
-
+npm install dotenv
 #Note you must create a .env file
 touch .env
-
 # This is the contents of the .env file
 SESSION_SECERT = secert 
-
+# Start the Backend
+node server.js
 
 ```
 
