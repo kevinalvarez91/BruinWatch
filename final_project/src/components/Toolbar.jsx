@@ -1,4 +1,5 @@
-import * as React from 'react';
+// import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -46,15 +47,47 @@ function ResponsiveAppBar() {
   // logout button function
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:5001/logout", {  // ✅ Use correct backend port
+      await fetch("http://localhost:5001/logout", {  // Use correct backend port
         method: "POST",
-        credentials: "include",  // ✅ Ensures session is properly cleared
+        credentials: "include",  // Ensures session is properly cleared
       });
-      navigate("/login");  // ✅ Redirect to login after logging out
+      navigate("/login");  // Redirect to login after logging out
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
+
+  const [user, setUser] = useState({
+      name: ""
+    });
+    
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('http://localhost:5001/api/user', {
+          credentials: 'include'
+        });
+        const text = await response.text();
+        if (response.ok) {
+          const userData = JSON.parse(text);
+          setUser(userData);
+        } else {
+          setError("Failed to fetch user data");
+          console.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        setError("Error connecting to server");
+        console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   return (
     <AppBar position="fixed" sx={{ backgroundColor: '#7886C7', zIndex: 10 }}>
@@ -168,7 +201,7 @@ function ResponsiveAppBar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ mr: 1 }}>
-                <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
+                <Avatar alt={user.name} src="/static/images/avatar/2.jpg" />
               </IconButton>
             </Tooltip>
             <Menu
