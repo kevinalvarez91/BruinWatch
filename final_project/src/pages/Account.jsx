@@ -332,7 +332,6 @@ const Account = () => {
                   <div className="security-card password-section">
                     <div className="security-item-header">
                       <h3>Password</h3>
-                      <button className="change-button">Change Password</button>
                     </div>
                     <div className="security-item-content">
                       <p>Last changed: 2 months ago</p>
@@ -380,7 +379,6 @@ const Account = () => {
                   <div className="security-card devices-section">
                     <div className="security-item-header">
                       <h3>Devices & Sessions</h3>
-                      <button className="view-button">View All</button>
                     </div>
                     <div className="security-item-content">
                       <div className="current-session">
