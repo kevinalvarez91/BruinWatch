@@ -4,25 +4,45 @@ import ResponsiveAppBar from "../components/Toolbar";
 
 const Account = () => {
   const [personalInfo, setPersonalInfo] = useState({
-    name: 'John Doe',
-    email: 'john@example.com',
-    contact: '(123) 456-7890',
-    aboutMe: 'I am a software engineer.'
+    name: "",
+    about: "",
+    contact: {
+      email: "",
+      phone: ""
+    },
   });
-  
-  const [securityInfo, setSecurityInfo] = useState({
-    password: '',
-    twoFactorEnabled: false
-  });
-  
-  const [activeSection, setActiveSection] = useState('personal');
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [savedSuccess, setSavedSuccess] = useState(false);
+    
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [deviceInfo, setDeviceInfo] = useState('');
-
+  
   useEffect(() => {
-    // Function to detect the browser name
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('http://localhost:5001/api/user', {
+          credentials: 'include'
+        });
+        const text = await response.text();
+        if (response.ok) {
+          const userData = JSON.parse(text);
+          setPersonalInfo(userData);
+        } else {
+          setError("Failed to fetch user data");
+          console.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        setError("Error connecting to server");
+        console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUserData();
+  }, []);
+  
+  // Device detection useEffect (from main branch)
+  useEffect(() => {
     function detectBrowser() {
       const userAgent = navigator.userAgent;
       let browserName = "Unknown Browser";
@@ -43,7 +63,6 @@ const Account = () => {
       return browserName;
     }
     
-    // Function to detect the operating system
     function detectOS() {
       const platform = navigator.platform.toLowerCase();
       const userAgent = navigator.userAgent.toLowerCase();
@@ -66,12 +85,59 @@ const Account = () => {
     const os = detectOS();
     setDeviceInfo(`${browser} on ${os}`);
   }, []);
+  
+  const [securityInfo, setSecurityInfo] = useState({
+    password: '',
+    twoFactorEnabled: false
+  });
+  
+  const [activeSection, setActiveSection] = useState('personal');
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
 
   const handlePersonalInfoChange = (e) => {
     const { id, value } = e.target;
+  
+    // If the field belongs under `contact`, handle it differently
+    if (id === "email") {
+      setPersonalInfo(prev => ({
+        ...prev,
+        contact: {
+          ...prev.contact,
+          email: value
+        }
+      }));
+    } else if (id === "contact") {
+      // Actually, rename `id="contact"` to `id="phone"` in your <input> to avoid confusion
+      setPersonalInfo(prev => ({
+        ...prev,
+        contact: {
+          ...prev.contact,
+          phone: value
+        }
+      }));
+    } else if (id === "about") {
+      setPersonalInfo(prev => ({
+        ...prev,
+        about: value
+      }));
+    } else if (id === "name") {
+      setPersonalInfo(prev => ({
+        ...prev,
+        name: value
+      }));
+    }
+  };
+  
+  const handleContactChange = (e) => {
+    const { id, value } = e.target;
     setPersonalInfo(prev => ({
       ...prev,
-      [id]: value
+      contact: {
+        ...prev.contact,
+        [id]: value
+      }
     }));
   };
   
@@ -89,21 +155,44 @@ const Account = () => {
       twoFactorEnabled: !prev.twoFactorEnabled
     }));
   };
-  
-  const handleSave = () => {
+
+  const handleSave = async () => {
     setIsSaving(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Make the actual PUT request to your backend
+      const response = await fetch("http://localhost:5001/api/user", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include", // so the session cookie is included
+        body: JSON.stringify({
+          name: personalInfo.name,
+          email: personalInfo.contact.email,
+          phone: personalInfo.contact.phone,
+          about: personalInfo.about
+        })
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to update user:", errorData);
+        alert(`Failed to update user: ${errorData.message}`);
+      } else {
+        console.log("User updated successfully");
+        setSavedSuccess(true);
+        setTimeout(() => {
+          setSavedSuccess(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      alert("Error updating user");
+    } finally {
       setIsSaving(false);
       setIsEditing(false);
-      setSavedSuccess(true);
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSavedSuccess(false);
-      }, 3000);
-    }, 800);
-  };
+    }
+  };  
 
   return (
     <div className="account-page">
@@ -191,7 +280,7 @@ const Account = () => {
                     <input 
                       type="email" 
                       id="email" 
-                      value={personalInfo.email}
+                      value={personalInfo.contact.email}
                       onChange={handlePersonalInfoChange}
                       disabled={!isEditing}
                       className={!isEditing ? 'readonly' : ''}
@@ -205,27 +294,27 @@ const Account = () => {
                     <label htmlFor="contact">Contact Number</label>
                     <input 
                       type="tel" 
-                      id="contact" 
-                      value={personalInfo.contact}
-                      onChange={handlePersonalInfoChange}
+                      id="phone" 
+                      value={personalInfo.contact.phone}
+                      onChange={handleContactChange}
                       disabled={!isEditing}
                       className={!isEditing ? 'readonly' : ''}
                     />
                   </div>
                   
                   <div className="form-group">
-                    <label htmlFor="aboutMe">About Me</label>
+                    <label htmlFor="about">About Me</label>
                     <textarea 
-                      id="aboutMe" 
+                      id="about"
                       rows="4"
-                      value={personalInfo.aboutMe}
+                      value={personalInfo.about}
                       onChange={handlePersonalInfoChange}
                       disabled={!isEditing}
                       className={!isEditing ? 'readonly' : ''}
                     ></textarea>
                     {isEditing && (
                       <div className="character-count">
-                        {personalInfo.aboutMe.length}/200 characters
+                        {personalInfo.about.length}/200 characters
                       </div>
                     )}
                   </div>
