@@ -44,7 +44,7 @@ const Profile = () => {
     };
     fetchUserData();
   }, []);
-
+  
   // Function to render star rating
   const renderStars = (rating) => {
     const stars = [];
