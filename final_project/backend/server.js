@@ -493,6 +493,28 @@ loginDb.run(`
   } else {
     console.log("Users table is ready.");
 
+    loginDb.all("PRAGMA table_info(users)", (err, columns) => {
+      if (err) {
+        console.error("Error retrieving table info:", err);
+        return;
+      }
+    
+      // Check if the "about" column already exists
+      const hasAbout = columns.some(column => column.name === 'about');
+      if (!hasAbout) {
+        // If the column does not exist, add it
+        loginDb.run(`ALTER TABLE users ADD COLUMN about TEXT;`, (alterErr) => {
+          if (alterErr) {
+            console.error("Error adding 'about' column:", alterErr);
+          } else {
+            console.log("'about' column added successfully.");
+          }
+        });
+      } else {
+        console.log("'about' column already exists. No changes made.");
+      }
+    });    
+
     // Query and print all records from the users table
     loginDb.all("SELECT * FROM users", [], (err, rows) => {
       if (err) {
@@ -610,6 +632,48 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
       console.error("Hashing error:", e);
       res.status(500).json({ message: "Error processing registration" });
     }
+  });
+});
+
+app.put('/api/user', checkAuthenticated, (req, res) => {
+  // Use user ID from req.user instead of email
+  const userId = req.user.id;
+  const { name, phone, about, email } = req.body;
+
+  // Basic validation: Ensure required fields are present
+  if (!name || !phone || !email) {
+    return res.status(400).json({ message: "Missing required fields." });
+  }
+
+  // Optionally, validate the email format (and check uniqueness)
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?ucla\.edu$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: "Invalid email format." });
+  }
+
+  const sql = `
+    UPDATE users
+    SET name = ?,
+        phone = ?,
+        about = ?,
+        email = ?
+    WHERE id = ?
+  `;
+
+  loginDb.run(sql, [name, phone, about, email, userId], function (err) {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Error updating user data" });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ message: "No user found to update." });
+    }
+
+    // Optionally update the req.user object or force re-login to update session data
+    req.user.email = email;
+
+    res.json({ message: "User data updated successfully." });
   });
 });
 
@@ -756,7 +820,7 @@ app.get('/api/user', checkAuthenticated, (req, res) => {
   console.log("User object: ", req.user);
   const userEmail = req.user.email; // Assuming the user's email is stored in req.user
 
-  loginDb.get("SELECT name, age, association, email, phone FROM users WHERE email = ?", [userEmail], (err, row) => {
+  loginDb.get("SELECT name, age, association, email, phone, about FROM users WHERE email = ?", [userEmail], (err, row) => {
     if (err) {
       console.error("Database error:", err);
       return res.status(500).json({ message: "Error retrieving user data" });
@@ -769,7 +833,7 @@ app.get('/api/user', checkAuthenticated, (req, res) => {
     res.json({
       name: row.name,
       profilePic: "NULL", // Placeholder for profile picture
-      about: "About me placeholder", // Placeholder for "About Me"
+      about: row.about, // Placeholder for "About Me"
       contact: {
         email: row.email,
         phone: row.phone || "No phone number provided"
