@@ -833,7 +833,7 @@ app.get('/api/user', checkAuthenticated, (req, res) => {
     res.json({
       name: row.name,
       profilePic: "NULL", // Placeholder for profile picture
-      about: row.about, // Placeholder for "About Me"
+      about: row.about ?? "", // if null replace with empty string
       contact: {
         email: row.email,
         phone: row.phone || "No phone number provided"
