@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../css/Account.css';
 import ResponsiveAppBar from "../components/Toolbar";
 
@@ -19,7 +19,54 @@ const Account = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
-  
+  const [deviceInfo, setDeviceInfo] = useState('');
+
+  useEffect(() => {
+    // Function to detect the browser name
+    function detectBrowser() {
+      const userAgent = navigator.userAgent;
+      let browserName = "Unknown Browser";
+      if (userAgent.indexOf("Firefox") > -1) {
+        browserName = "Firefox";
+      } else if (userAgent.indexOf("OPR") > -1 || userAgent.indexOf("Opera") > -1) {
+        browserName = "Opera";
+      } else if (userAgent.indexOf("Trident") > -1) {
+        browserName = "Internet Explorer";
+      } else if (userAgent.indexOf("Edge") > -1) {
+        browserName = "Edge";
+      } else if (userAgent.indexOf("Chrome") > -1) {
+        browserName = "Chrome";
+      } else if (userAgent.indexOf("Safari") > -1) {
+        // Chrome's userAgent also includes "Safari", so Chrome is checked first.
+        browserName = "Safari";
+      }
+      return browserName;
+    }
+    
+    // Function to detect the operating system
+    function detectOS() {
+      const platform = navigator.platform.toLowerCase();
+      const userAgent = navigator.userAgent.toLowerCase();
+      let os = "Unknown OS";
+      if (platform.indexOf("win") > -1) {
+        os = "Windows";
+      } else if (platform.indexOf("mac") > -1) {
+        os = "macOS";
+      } else if (platform.indexOf("linux") > -1) {
+        os = "Linux";
+      } else if (/android/.test(userAgent)) {
+        os = "Android";
+      } else if (/iphone|ipad|ipod/.test(userAgent)) {
+        os = "iOS";
+      }
+      return os;
+    }
+    
+    const browser = detectBrowser();
+    const os = detectOS();
+    setDeviceInfo(`${browser} on ${os}`);
+  }, []);
+
   const handlePersonalInfoChange = (e) => {
     const { id, value } = e.target;
     setPersonalInfo(prev => ({
@@ -251,7 +298,7 @@ const Account = () => {
                         <div className="device-info">
                           <span className="device-icon">💻</span>
                           <div>
-                            <div className="device-name">Chrome on macOS</div>
+                            <div className="device-name">{deviceInfo}</div>
                             <div className="session-details">Current session • Los Angeles, CA</div>
                           </div>
                         </div>
