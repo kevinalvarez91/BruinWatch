@@ -17,6 +17,9 @@ Many UCLA students may lack access to real-time security updates and tools that 
 -  **Data & Insights** – Access safety trends and reports to stay informed.
 -  **Privacy-Focused** – Ensures user data remains secure and anonymous.
 
+<img width="1799" alt="image" src="https://github.com/user-attachments/assets/51afa124-9372-4fa6-934f-2162d6646a1b" />
+
+
 ## Getting Started
 
 ### Prerequisites
