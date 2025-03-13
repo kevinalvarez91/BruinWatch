@@ -40,12 +40,8 @@ npm run dev
 # Backend (dependency install)
 cd backend
 npm install dotenv
+
 #Note you must create a .env file
-touch .env
-# This is the contents of the .env file
-SESSION_SECRET = secret 
-# Start the Backend
-node server.js
 
 ```
 
