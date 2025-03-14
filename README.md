@@ -45,6 +45,7 @@ cd backend
 npm install dotenv
 
 #Note you must create a .env file
+SESSION_SECRET=xyz
 
 ```
 
